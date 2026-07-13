@@ -57,6 +57,29 @@ if ("IntersectionObserver" in window && sections.length) {
   sections.forEach((section) => spy.observe(section));
 }
 
+// Manual dark/light theme toggle
+const themeToggle = document.getElementById("theme-toggle");
+
+const getEffectiveTheme = () => {
+  const stored = document.documentElement.getAttribute("data-theme");
+  if (stored) return stored;
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+};
+
+const updateToggleLabel = () => {
+  const current = getEffectiveTheme();
+  themeToggle.setAttribute("aria-label", current === "light" ? "Switch to dark theme" : "Switch to light theme");
+};
+
+updateToggleLabel();
+
+themeToggle.addEventListener("click", () => {
+  const next = getEffectiveTheme() === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
+  updateToggleLabel();
+});
+
 // Project card spotlight hover effect
 if (!reducedMotion) {
   document.querySelectorAll(".project-card").forEach((card) => {
