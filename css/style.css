@@ -313,6 +313,15 @@ main {
   border-color: var(--accent-dim);
 }
 
+.btn.is-copied {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.footer__links a.is-copied {
+  color: var(--accent);
+}
+
 /* About */
 
 .about__text {

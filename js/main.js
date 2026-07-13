@@ -138,6 +138,26 @@ skillChips.forEach((chip) => {
   });
 });
 
+// Copy-to-clipboard email buttons
+if (navigator.clipboard) {
+  document.querySelectorAll(".copy-email").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      const email = el.href.replace(/^mailto:/, "");
+      navigator.clipboard.writeText(email).then(() => {
+        const label = el.dataset.defaultLabel;
+        el.textContent = "Copied!";
+        el.classList.add("is-copied");
+        clearTimeout(el._copyTimeout);
+        el._copyTimeout = setTimeout(() => {
+          el.textContent = label;
+          el.classList.remove("is-copied");
+        }, 1600);
+      });
+    });
+  });
+}
+
 // Manual dark/light theme toggle
 const themeToggle = document.getElementById("theme-toggle");
 
