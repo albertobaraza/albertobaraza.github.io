@@ -182,12 +182,69 @@ themeToggle.addEventListener("click", () => {
 });
 
 // Project card spotlight hover effect
-if (!reducedMotion) {
-  document.querySelectorAll(".project-card").forEach((card) => {
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty("--x", `${e.clientX - rect.left}px`);
-      card.style.setProperty("--y", `${e.clientY - rect.top}px`);
-    });
+const addSpotlight = (card) => {
+  if (reducedMotion) return;
+  card.addEventListener("mousemove", (e) => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty("--x", `${e.clientX - rect.left}px`);
+    card.style.setProperty("--y", `${e.clientY - rect.top}px`);
   });
+};
+
+document.querySelectorAll(".project-card").forEach(addSpotlight);
+
+// Live GitHub project cards (falls back to the static cards above on failure)
+const projectsContainer = document.querySelector(".projects");
+const EXCLUDED_REPOS = new Set(["albertobaraza", "albertobaraza.github.io"]);
+
+if (projectsContainer) {
+  fetch("https://api.github.com/users/albertobaraza/repos?sort=pushed&per_page=100")
+    .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+    .then((repos) => {
+      const top = repos
+        .filter((repo) => !repo.fork && !repo.private && !repo.archived && !EXCLUDED_REPOS.has(repo.name))
+        .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
+        .slice(0, 4);
+
+      if (!top.length) return;
+
+      projectsContainer.innerHTML = "";
+
+      top.forEach((repo, i) => {
+        const card = document.createElement("a");
+        card.className = "project-card reveal is-visible";
+        card.style.setProperty("--i", String(i + 1));
+        card.href = repo.html_url;
+        card.target = "_blank";
+        card.rel = "noopener";
+
+        const title = document.createElement("h3");
+        title.textContent = `${repo.name} `;
+        const arrow = document.createElement("span");
+        arrow.className = "project-card__arrow";
+        arrow.textContent = "↗";
+        title.appendChild(arrow);
+
+        const desc = document.createElement("p");
+        desc.textContent = repo.description || "No description provided.";
+
+        card.append(title, desc);
+
+        if (repo.language || repo.stargazers_count) {
+          const stack = document.createElement("p");
+          stack.className = "project-card__stack";
+          const parts = [];
+          if (repo.language) parts.push(repo.language);
+          if (repo.stargazers_count) parts.push(`★ ${repo.stargazers_count}`);
+          stack.textContent = parts.join(" · ");
+          card.appendChild(stack);
+        }
+
+        addSpotlight(card);
+        projectsContainer.appendChild(card);
+      });
+    })
+    .catch(() => {
+      // Network error, rate limit, or no JS: static fallback cards stay in place
+    });
 }
