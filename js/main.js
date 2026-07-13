@@ -57,6 +57,16 @@ if ("IntersectionObserver" in window && sections.length) {
   sections.forEach((section) => spy.observe(section));
 }
 
+// Collapsible timeline entries
+document.querySelectorAll(".timeline__toggle").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const item = btn.closest(".timeline__item");
+    const expanded = item.classList.toggle("is-expanded");
+    btn.setAttribute("aria-expanded", String(expanded));
+    btn.querySelector("span").textContent = expanded ? "Hide details" : "Show details";
+  });
+});
+
 // Career-arc pipeline: jump to (and expand) the matching experience entry
 document.querySelectorAll(".pipeline__node[data-target]").forEach((node) => {
   node.addEventListener("click", () => {
@@ -71,6 +81,60 @@ document.querySelectorAll(".pipeline__node[data-target]").forEach((node) => {
     target.classList.remove("is-jumped");
     void target.offsetWidth;
     target.classList.add("is-jumped");
+  });
+});
+
+// Skill <-> experience filtering
+const skillChips = document.querySelectorAll(".skills .chip");
+const skillsContainer = document.querySelector(".skills");
+const timelineList = document.querySelector(".timeline");
+const timelineItems = document.querySelectorAll(".timeline__item");
+
+timelineItems.forEach((item) => {
+  const stackEl = item.querySelector(".timeline__stack");
+  if (stackEl) {
+    stackEl.dataset.original = stackEl.innerHTML;
+  }
+});
+
+const clearFilter = () => {
+  skillChips.forEach((chip) => chip.classList.remove("is-active"));
+  skillsContainer.classList.remove("has-active");
+  timelineList.classList.remove("has-filter");
+  timelineItems.forEach((item) => {
+    item.classList.remove("is-match");
+    const stackEl = item.querySelector(".timeline__stack");
+    if (stackEl && stackEl.dataset.original) {
+      stackEl.innerHTML = stackEl.dataset.original;
+    }
+  });
+};
+
+const applyFilter = (skill) => {
+  timelineList.classList.add("has-filter");
+  timelineItems.forEach((item) => {
+    const stackEl = item.querySelector(".timeline__stack");
+    const stack = stackEl ? stackEl.dataset.original.split("·").map((s) => s.trim()) : [];
+    const isMatch = stack.includes(skill);
+    item.classList.toggle("is-match", isMatch);
+    if (stackEl) {
+      stackEl.innerHTML = stackEl.dataset.original.replace(
+        new RegExp(`(^|·\\s*)(${skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})(\\s*·|$)`),
+        (match, before, name, after) => `${before}<mark>${name}</mark>${after}`
+      );
+    }
+  });
+};
+
+skillChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    const alreadyActive = chip.classList.contains("is-active");
+    clearFilter();
+    if (!alreadyActive) {
+      chip.classList.add("is-active");
+      skillsContainer.classList.add("has-active");
+      applyFilter(chip.textContent.trim());
+    }
   });
 });
 
