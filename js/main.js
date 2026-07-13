@@ -57,6 +57,23 @@ if ("IntersectionObserver" in window && sections.length) {
   sections.forEach((section) => spy.observe(section));
 }
 
+// Career-arc pipeline: jump to (and expand) the matching experience entry
+document.querySelectorAll(".pipeline__node[data-target]").forEach((node) => {
+  node.addEventListener("click", () => {
+    const target = document.getElementById(node.dataset.target);
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+
+    const toggle = target.querySelector('.timeline__toggle[aria-expanded="false"]');
+    if (toggle) toggle.click();
+
+    target.classList.remove("is-jumped");
+    void target.offsetWidth;
+    target.classList.add("is-jumped");
+  });
+});
+
 // Manual dark/light theme toggle
 const themeToggle = document.getElementById("theme-toggle");
 

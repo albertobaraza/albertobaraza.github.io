@@ -13,6 +13,15 @@
   --max-width: 780px;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+}
+
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/caveat-600.woff2") format("woff2");
 }
 
 * {
@@ -21,6 +30,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -311,6 +321,131 @@ main {
   font-size: 1.05rem;
 }
 
+.pipeline-bleed {
+  position: relative;
+  width: 100vw;
+  margin-top: 2.25rem;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.pipeline {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+  overflow-x: auto;
+  padding: 6px 1.5rem 0.25rem;
+}
+
+@media (min-width: 901px) {
+  .pipeline {
+    /* Content fits with no scrolling at this width (verified), so let overflow
+       go back to fully visible - an element can't clip one axis without also
+       clipping the other, which would cut off the annotation above the current node. */
+    overflow-x: visible;
+  }
+}
+
+.pipeline__node {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  padding: 0.5rem 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.pipeline__node:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.pipeline__link {
+  flex: 1 1 32px;
+  min-width: 24px;
+  height: 2px;
+  background: var(--border);
+}
+
+.pipeline__beam {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px 2px var(--accent), 0 0 16px 4px rgba(34, 211, 238, 0.45);
+  animation: pipelineBeam 5s linear infinite;
+  pointer-events: none;
+}
+
+.pipeline__hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+@keyframes pipelineBeam {
+  0%, 3% {
+    left: 0;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  97%, 100% {
+    left: calc(100% - 9px);
+    opacity: 0;
+  }
+}
+
+.pipeline-annotation {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  width: 0;
+  height: 0;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.pipeline-annotation__text {
+  position: absolute;
+  left: 34px;
+  bottom: 16px;
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  line-height: 1;
+  white-space: nowrap;
+  transform: rotate(4deg);
+}
+
+.pipeline-annotation__arrow {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 30px;
+  height: 37px;
+}
+
 /* Timeline */
 
 .timeline {
@@ -326,6 +461,20 @@ main {
   display: grid;
   grid-template-columns: 140px 1fr;
   gap: 1.5rem;
+}
+
+.timeline__item.is-jumped {
+  border-radius: var(--radius);
+  animation: timelineJumpPulse 1.1s ease;
+}
+
+@keyframes timelineJumpPulse {
+  0%, 100% {
+    box-shadow: none;
+  }
+  30% {
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.3);
+  }
 }
 
 .timeline__period {
@@ -510,6 +659,14 @@ main {
   }
 }
 
+@media (max-width: 1100px) {
+  .pipeline-annotation {
+    /* Below this, the last node sits too close to the viewport edge for the
+       mirrored text to have room, regardless of font-size/offset tuning. */
+    display: none;
+  }
+}
+
 /* Theme: light (manual toggle) */
 
 :root[data-theme="light"] {
@@ -579,6 +736,15 @@ main {
   }
 
   .hero__glow {
+    animation: none;
+  }
+
+  .pipeline__beam {
+    animation: none;
+    opacity: 0;
+  }
+
+  .timeline__item.is-jumped {
     animation: none;
   }
 
