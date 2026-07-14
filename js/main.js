@@ -25,15 +25,28 @@ if (reducedMotion || !("IntersectionObserver" in window)) {
 
 // Draggable sticky note
 const stickyNote = document.querySelector(".hero__eyebrow");
+const stickyHand = document.querySelector(".hero__eyebrow-hand");
 
 if (stickyNote) {
+  const DRAG_THRESHOLD = 6; // px of movement before a tap counts as a drag
+  const DOUBLE_TAP_WINDOW = 400; // ms between taps to count as "quick"
+
   let dragOffsetX = 0;
   let dragOffsetY = 0;
+  let downX = 0;
+  let downY = 0;
+  let downOnHand = false;
+  let moved = false;
+  let lastHandTapTime = 0;
 
   stickyNote.addEventListener("pointerdown", (e) => {
     const rect = stickyNote.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
+    downX = e.clientX;
+    downY = e.clientY;
+    downOnHand = Boolean(stickyHand && (e.target === stickyHand || stickyHand.contains(e.target)));
+    moved = false;
 
     // Reparent to <body> so it escapes the hero's stacking context and
     // always renders above every other element, not just its old siblings.
@@ -50,13 +63,39 @@ if (stickyNote) {
 
   stickyNote.addEventListener("pointermove", (e) => {
     if (!stickyNote.classList.contains("is-dragging")) return;
+    if (Math.abs(e.clientX - downX) > DRAG_THRESHOLD || Math.abs(e.clientY - downY) > DRAG_THRESHOLD) {
+      moved = true;
+    }
     stickyNote.style.left = `${e.clientX - dragOffsetX}px`;
     stickyNote.style.top = `${e.clientY - dragOffsetY}px`;
   });
 
+  const triggerClap = () => {
+    const rect = stickyHand.getBoundingClientRect();
+    const clap = document.createElement("span");
+    clap.className = "clap-pop";
+    clap.textContent = "👏";
+    clap.style.left = `${rect.left + rect.width / 2}px`;
+    clap.style.top = `${rect.top}px`;
+    // Appended to <body>, not the hand, so it escapes the note's clip-path
+    // instead of being clipped as it animates outside the note's bounds.
+    document.body.appendChild(clap);
+    clap.addEventListener("animationend", () => clap.remove());
+  };
+
   const stopDragging = (e) => {
     stickyNote.classList.remove("is-dragging");
     stickyNote.releasePointerCapture(e.pointerId);
+
+    if (!moved && downOnHand) {
+      const now = Date.now();
+      if (now - lastHandTapTime < DOUBLE_TAP_WINDOW) {
+        triggerClap();
+        lastHandTapTime = 0;
+      } else {
+        lastHandTapTime = now;
+      }
+    }
   };
 
   stickyNote.addEventListener("pointerup", stopDragging);

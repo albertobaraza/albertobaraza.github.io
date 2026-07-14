@@ -300,6 +300,39 @@ main {
   box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.35);
 }
 
+.hero__eyebrow-hand {
+  position: relative;
+  display: inline-block;
+}
+
+.clap-pop {
+  position: fixed;
+  z-index: 1002;
+  transform: translate(-50%, 0) scale(0.4) rotate(-10deg);
+  font-size: 1.4rem;
+  pointer-events: none;
+  animation: clapPop 0.55s ease-out forwards;
+}
+
+@keyframes clapPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.4) rotate(-10deg);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -16px) scale(1.35) rotate(10deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -20px) scale(1.1) rotate(-8deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -34px) scale(0.9) rotate(0deg);
+  }
+}
+
 .hero__name {
   font-size: clamp(2.25rem, 6vw, 3.25rem);
   margin: 0;
