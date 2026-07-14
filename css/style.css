@@ -501,10 +501,29 @@ main {
   }
 }
 
+.timeline__meta {
+  /* Optical alignment: the heading's line-height leaves more space above its
+     glyphs than the smaller mono date text, so the date visually sits a few
+     px higher than the heading despite both boxes sharing the same grid row
+     start. Nudge down to compensate (measured, not a guess). */
+  margin-top: 3px;
+}
+
 .timeline__period {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
   font-family: var(--font-mono);
   font-size: 0.8rem;
+  line-height: 1.3;
   color: var(--text-muted);
+}
+
+.timeline__period-arrow {
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.6;
 }
 
 .timeline__body h3 {
