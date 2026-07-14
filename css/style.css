@@ -597,6 +597,28 @@ main {
 
 .stack {
   display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stack__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.stack__group-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stack__chips {
+  display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
 }
