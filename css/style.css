@@ -552,7 +552,7 @@ main {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  color: var(--accent-dim);
+  color: var(--text-muted);
 }
 
 .timeline__toggle {
