@@ -52,10 +52,10 @@ if (stickyNote) {
     // always renders above every other element, not just its old siblings.
     document.body.appendChild(stickyNote);
 
-    stickyNote.style.position = "fixed";
+    stickyNote.style.position = "absolute";
     stickyNote.style.margin = "0";
-    stickyNote.style.left = `${rect.left}px`;
-    stickyNote.style.top = `${rect.top}px`;
+    stickyNote.style.left = `${rect.left + window.scrollX}px`;
+    stickyNote.style.top = `${rect.top + window.scrollY}px`;
 
     stickyNote.classList.add("is-dragging");
     stickyNote.setPointerCapture(e.pointerId);
@@ -66,8 +66,8 @@ if (stickyNote) {
     if (Math.abs(e.clientX - downX) > DRAG_THRESHOLD || Math.abs(e.clientY - downY) > DRAG_THRESHOLD) {
       moved = true;
     }
-    stickyNote.style.left = `${e.clientX - dragOffsetX}px`;
-    stickyNote.style.top = `${e.clientY - dragOffsetY}px`;
+    stickyNote.style.left = `${e.clientX - dragOffsetX + window.scrollX}px`;
+    stickyNote.style.top = `${e.clientY - dragOffsetY + window.scrollY}px`;
   });
 
   const triggerClap = () => {
