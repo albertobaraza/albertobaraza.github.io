@@ -68,19 +68,48 @@ document.querySelectorAll(".timeline__toggle").forEach((btn) => {
 });
 
 // Career-arc pipeline: jump to (and expand) the matching experience entry
+let cancelPendingHighlight = null;
+
 document.querySelectorAll(".pipeline__node[data-target]").forEach((node) => {
   node.addEventListener("click", () => {
     const target = document.getElementById(node.dataset.target);
     if (!target) return;
+
+    if (cancelPendingHighlight) cancelPendingHighlight();
 
     target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
 
     const toggle = target.querySelector('.timeline__toggle[aria-expanded="false"]');
     if (toggle) toggle.click();
 
-    target.classList.remove("is-jumped");
-    void target.offsetWidth;
-    target.classList.add("is-jumped");
+    const highlight = () => {
+      target.classList.remove("is-jumped");
+      void target.offsetWidth;
+      target.classList.add("is-jumped");
+    };
+
+    if (reducedMotion) {
+      highlight();
+      return;
+    }
+
+    // Wait for the smooth scroll to actually arrive before pulsing, so distant
+    // nodes don't finish the highlight animation before the scroll gets there.
+    // Falls back to a timer if scrollend isn't supported or nothing needed scrolling.
+    const onScrollEnd = () => {
+      clearTimeout(fallback);
+      highlight();
+    };
+    const fallback = setTimeout(() => {
+      document.removeEventListener("scrollend", onScrollEnd);
+      highlight();
+    }, 1200);
+
+    document.addEventListener("scrollend", onScrollEnd, { once: true });
+    cancelPendingHighlight = () => {
+      clearTimeout(fallback);
+      document.removeEventListener("scrollend", onScrollEnd);
+    };
   });
 });
 
