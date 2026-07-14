@@ -252,11 +252,52 @@ main {
   }
 }
 
+.hero__name-row {
+  position: relative;
+  display: inline-block;
+}
+
 .hero__eyebrow {
-  font-family: var(--font-mono);
-  color: var(--accent);
-  margin: 0 0 0.5rem;
-  font-size: 0.95rem;
+  position: absolute;
+  top: -1.5rem;
+  left: 100%;
+  margin: 0 0 0 12rem;
+  z-index: 1000;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.hero__eyebrow.is-dragging {
+  cursor: grabbing;
+  z-index: 1001;
+}
+
+.hero__eyebrow-note {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-hand);
+  font-size: 1.4rem;
+  line-height: 1.2;
+  color: #14290a;
+  background: linear-gradient(160deg, #ecfccb 0%, #86efac 55%, #4ade80 100%);
+  padding: 0.6rem 1.1rem 1rem 0.9rem;
+  transform: rotate(6deg) scale(1.25);
+  filter: drop-shadow(3px 4px 4px rgba(0, 0, 0, 0.3)) drop-shadow(6px 10px 16px rgba(0, 0, 0, 0.4));
+  white-space: nowrap;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+
+.hero__eyebrow-note::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #86efac 0%, #16803c 100%);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.35);
 }
 
 .hero__name {
@@ -793,6 +834,16 @@ main {
 
   .nav__links a {
     font-size: 0.8rem;
+  }
+
+  .hero__name-row {
+    display: block;
+  }
+
+  .hero__eyebrow {
+    position: static;
+    display: inline-block;
+    margin: 0 0 0.75rem;
   }
 }
 

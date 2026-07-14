@@ -23,6 +23,46 @@ if (reducedMotion || !("IntersectionObserver" in window)) {
   revealEls.forEach((el) => revealObserver.observe(el));
 }
 
+// Draggable sticky note
+const stickyNote = document.querySelector(".hero__eyebrow");
+
+if (stickyNote) {
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  stickyNote.addEventListener("pointerdown", (e) => {
+    const rect = stickyNote.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+
+    // Reparent to <body> so it escapes the hero's stacking context and
+    // always renders above every other element, not just its old siblings.
+    document.body.appendChild(stickyNote);
+
+    stickyNote.style.position = "fixed";
+    stickyNote.style.margin = "0";
+    stickyNote.style.left = `${rect.left}px`;
+    stickyNote.style.top = `${rect.top}px`;
+
+    stickyNote.classList.add("is-dragging");
+    stickyNote.setPointerCapture(e.pointerId);
+  });
+
+  stickyNote.addEventListener("pointermove", (e) => {
+    if (!stickyNote.classList.contains("is-dragging")) return;
+    stickyNote.style.left = `${e.clientX - dragOffsetX}px`;
+    stickyNote.style.top = `${e.clientY - dragOffsetY}px`;
+  });
+
+  const stopDragging = (e) => {
+    stickyNote.classList.remove("is-dragging");
+    stickyNote.releasePointerCapture(e.pointerId);
+  };
+
+  stickyNote.addEventListener("pointerup", stopDragging);
+  stickyNote.addEventListener("pointercancel", stopDragging);
+}
+
 // Nav: shadow on scroll + scrollspy active link
 const nav = document.querySelector(".nav");
 const navLinks = document.querySelectorAll(".nav__links a");
