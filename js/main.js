@@ -113,9 +113,9 @@ document.querySelectorAll(".pipeline__node[data-target]").forEach((node) => {
   });
 });
 
-// Skill <-> experience filtering
-const skillChips = document.querySelectorAll(".skills .chip");
-const skillsContainer = document.querySelector(".skills");
+// Stack <-> experience filtering
+const stackChips = document.querySelectorAll(".stack .chip");
+const stackContainer = document.querySelector(".stack");
 const timelineList = document.querySelector(".timeline");
 const timelineItems = document.querySelectorAll(".timeline__item");
 
@@ -127,8 +127,8 @@ timelineItems.forEach((item) => {
 });
 
 const clearFilter = () => {
-  skillChips.forEach((chip) => chip.classList.remove("is-active"));
-  skillsContainer.classList.remove("has-active");
+  stackChips.forEach((chip) => chip.classList.remove("is-active"));
+  stackContainer.classList.remove("has-active");
   timelineList.classList.remove("has-filter");
   timelineItems.forEach((item) => {
     item.classList.remove("is-match");
@@ -155,13 +155,13 @@ const applyFilter = (skill) => {
   });
 };
 
-skillChips.forEach((chip) => {
+stackChips.forEach((chip) => {
   chip.addEventListener("click", () => {
     const alreadyActive = chip.classList.contains("is-active");
     clearFilter();
     if (!alreadyActive) {
       chip.classList.add("is-active");
-      skillsContainer.classList.add("has-active");
+      stackContainer.classList.add("has-active");
       applyFilter(chip.textContent.trim());
     }
   });

@@ -593,9 +593,9 @@ main {
   vertical-align: middle;
 }
 
-/* Skills */
+/* Stack */
 
-.skills {
+.stack {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
@@ -626,11 +626,11 @@ main {
   font-weight: 600;
 }
 
-.skills.has-active .chip:not(.is-active) {
+.stack.has-active .chip:not(.is-active) {
   opacity: 0.5;
 }
 
-.skills__hint {
+.stack__hint {
   margin: 0.75rem 0 0;
   font-size: 0.8rem;
   color: var(--text-muted);
