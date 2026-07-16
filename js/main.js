@@ -305,6 +305,121 @@ document.querySelectorAll(".project-card").forEach(addSpotlight);
 const projectsContainer = document.querySelector(".projects");
 const EXCLUDED_REPOS = new Set(["albertobaraza", "albertobaraza.github.io"]);
 
+// Total commit count via the `rel="last"` page number of a per_page=1 request
+// (avoids paging through full commit history just to count it).
+const fetchCommitCount = (repo) => {
+  const commitsUrl = repo.commits_url.replace("{/sha}", "");
+  return fetch(`${commitsUrl}?per_page=1`)
+    .then((res) => {
+      if (!res.ok) return null;
+      const link = res.headers.get("link");
+      if (link) {
+        const match = link.match(/[?&]page=(\d+)>;\s*rel="last"/);
+        if (match) return Number(match[1]);
+      }
+      return res.json().then((commits) => commits.length);
+    })
+    .catch(() => null);
+};
+
+const fetchTopLanguages = (repo) =>
+  fetch(repo.languages_url)
+    .then((res) => (res.ok ? res.json() : {}))
+    .then((bytesByLanguage) =>
+      Object.entries(bytesByLanguage)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([name]) => name)
+    )
+    .catch(() => []);
+
+// GitHub linguist colors for common languages; unlisted languages fall back to the site accent.
+const LANGUAGE_COLORS = {
+  JavaScript: "#f1e05a",
+  TypeScript: "#3178c6",
+  Python: "#3572A5",
+  Java: "#b07219",
+  HTML: "#e34c26",
+  CSS: "#563d7c",
+  SCSS: "#c6538c",
+  Shell: "#89e051",
+  Dockerfile: "#384d54",
+  "Jupyter Notebook": "#DA5B0B",
+  PLpgSQL: "#336790",
+  Go: "#00ADD8",
+  Ruby: "#701516",
+  PHP: "#4F5D95",
+  "C++": "#f34b7d",
+  C: "#555555",
+  Rust: "#dea584",
+  Swift: "#F05138",
+  Kotlin: "#A97BFF",
+  Vue: "#41b883",
+};
+const DEFAULT_THUMB_COLOR = "#22d3ee";
+
+const getInitials = (name) => {
+  const words = name.split(/[-_\s]+/).filter(Boolean);
+  const significant = words.filter((word) => word.length > 1);
+  const source = significant.length >= 2 ? significant : words;
+  if (source.length >= 2) return (source[0][0] + source[1][0]).toUpperCase();
+  return (source[0] || name).slice(0, 2).toUpperCase();
+};
+
+// Perceived-brightness check so initials stay legible against any language color.
+const getReadableTextColor = (hex) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? "#1a1a1a" : "#ffffff";
+};
+
+// Drop an image at assets/projects/<repo-name>.png to override the generated initials tile.
+const buildThumb = (repo, languages) => {
+  const thumb = document.createElement("div");
+  thumb.className = "project-card__thumb";
+
+  const color = LANGUAGE_COLORS[languages[0]] || DEFAULT_THUMB_COLOR;
+  thumb.style.background = color;
+
+  const label = document.createElement("span");
+  label.style.color = getReadableTextColor(color);
+  label.textContent = getInitials(repo.name);
+  thumb.appendChild(label);
+
+  const img = new Image();
+  img.alt = "";
+  img.onload = () => {
+    thumb.style.background = "";
+    thumb.innerHTML = "";
+    thumb.appendChild(img);
+  };
+  img.src = `assets/projects/${repo.name}.png`;
+
+  return thumb;
+};
+
+const buildMetaRow = (repo, commitCount, languages) => {
+  const items = [];
+  const year = new Date(repo.created_at).getFullYear();
+  if (year) items.push(["icon-calendar", String(year)]);
+  if (commitCount) items.push(["icon-commit", `${commitCount} commit${commitCount === 1 ? "" : "s"}`]);
+  if (languages.length) items.push(["icon-code", languages.join(" · ")]);
+
+  if (!items.length) return null;
+
+  const meta = document.createElement("ul");
+  meta.className = "project-card__meta";
+  items.forEach(([iconId, label]) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<svg class="project-card__meta-icon" aria-hidden="true"><use href="#${iconId}"/></svg>`;
+    li.append(label);
+    meta.appendChild(li);
+  });
+  return meta;
+};
+
 if (projectsContainer) {
   fetch("https://api.github.com/users/albertobaraza/repos?sort=pushed&per_page=100")
     .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
@@ -316,40 +431,43 @@ if (projectsContainer) {
 
       if (!top.length) return;
 
-      projectsContainer.innerHTML = "";
+      return Promise.all(
+        top.map((repo) => Promise.all([fetchCommitCount(repo), fetchTopLanguages(repo)]))
+      ).then((stats) => {
+        projectsContainer.innerHTML = "";
 
-      top.forEach((repo, i) => {
-        const card = document.createElement("a");
-        card.className = "project-card reveal is-visible";
-        card.style.setProperty("--i", String(i + 1));
-        card.href = repo.html_url;
-        card.target = "_blank";
-        card.rel = "noopener";
+        top.forEach((repo, i) => {
+          const [commitCount, languages] = stats[i];
 
-        const title = document.createElement("h3");
-        title.textContent = `${repo.name} `;
-        const arrow = document.createElement("span");
-        arrow.className = "project-card__arrow";
-        arrow.textContent = "↗";
-        title.appendChild(arrow);
+          const card = document.createElement("a");
+          card.className = "project-card reveal is-visible";
+          card.style.setProperty("--i", String(i + 1));
+          card.href = repo.html_url;
+          card.target = "_blank";
+          card.rel = "noopener";
 
-        const desc = document.createElement("p");
-        desc.textContent = repo.description || "No description provided.";
+          const title = document.createElement("h3");
+          title.textContent = `${repo.name} `;
+          const arrow = document.createElement("span");
+          arrow.className = "project-card__arrow";
+          arrow.textContent = "↗";
+          title.appendChild(arrow);
 
-        card.append(title, desc);
+          const desc = document.createElement("p");
+          desc.textContent = repo.description || "No description provided.";
 
-        if (repo.language || repo.stargazers_count) {
-          const stack = document.createElement("p");
-          stack.className = "project-card__stack";
-          const parts = [];
-          if (repo.language) parts.push(repo.language);
-          if (repo.stargazers_count) parts.push(`★ ${repo.stargazers_count}`);
-          stack.textContent = parts.join(" · ");
-          card.appendChild(stack);
-        }
+          const body = document.createElement("div");
+          body.className = "project-card__body";
+          body.append(title, desc);
 
-        addSpotlight(card);
-        projectsContainer.appendChild(card);
+          const meta = buildMetaRow(repo, commitCount, languages);
+          if (meta) body.appendChild(meta);
+
+          card.append(buildThumb(repo, languages), body);
+
+          addSpotlight(card);
+          projectsContainer.appendChild(card);
+        });
       });
     })
     .catch(() => {
