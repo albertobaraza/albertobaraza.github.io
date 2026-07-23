@@ -73,15 +73,21 @@ a:hover {
 }
 
 .nav__brand {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
 }
 
-.nav__brand:hover {
-  color: var(--accent);
-  text-decoration: none;
+.nav__brand-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.nav__brand:hover .nav__brand-avatar {
+  border-color: var(--accent);
 }
 
 .nav__links {
