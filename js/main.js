@@ -426,7 +426,7 @@ if (projectsContainer) {
     .then((repos) => {
       const top = repos
         .filter((repo) => !repo.fork && !repo.private && !repo.archived && !EXCLUDED_REPOS.has(repo.name))
-        .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 4);
 
       if (!top.length) return;
