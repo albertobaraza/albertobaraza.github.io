@@ -7,7 +7,14 @@
   <meta name="description" content="Alberto Baraza, Senior Data Engineer. Clean pipelines, solid architecture, systems that don't break.">
   <link rel="icon" href="https://github.com/albertobaraza.png?size=64" type="image/png">
   <link rel="stylesheet" href="css/style.css">
-  <noscript><style>.reveal{opacity:1!important;transform:none!important;}</style></noscript>
+  <noscript><style>
+    .reveal{opacity:1!important;transform:none!important;}
+    @media (max-width: 600px) {
+      .pipeline{flex-direction:column;align-items:center;max-width:none;overflow-x:visible;padding:0.25rem 0;}
+      .pipeline__link{width:2px;height:28px;flex:0 0 auto;min-width:0;}
+      .pipeline__beam{display:none;}
+    }
+  </style></noscript>
   <script>
     (function () {
       var stored = localStorage.getItem("theme");

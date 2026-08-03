@@ -508,6 +508,49 @@ main {
   }
 }
 
+@keyframes pipelineBeamVertical {
+  0%, 3% {
+    top: 0;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  97%, 100% {
+    top: calc(100% - 9px);
+    opacity: 0;
+  }
+}
+
+/* Applied by JS the moment the horizontal row would overflow, regardless of
+   viewport width - a long browser-zoom or a wide-but-short window can trigger
+   it just as easily as a narrow phone. See updatePipelineLayout in main.js. */
+.pipeline--vertical {
+  flex-direction: column;
+  align-items: center;
+  max-width: none;
+  overflow-x: visible;
+  padding: 0.25rem 0;
+}
+
+.pipeline--vertical .pipeline__link {
+  width: 2px;
+  height: 28px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.pipeline--vertical .pipeline__beam {
+  top: 0;
+  left: 50%;
+  margin-top: 0;
+  margin-left: -4px;
+  animation-name: pipelineBeamVertical;
+}
+
 .pipeline-annotation {
   position: absolute;
   left: 50%;

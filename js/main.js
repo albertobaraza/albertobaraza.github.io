@@ -192,6 +192,50 @@ document.querySelectorAll(".pipeline__node[data-target]").forEach((node) => {
   });
 });
 
+// Career-arc pipeline: switch to a top-down layout the instant the row of
+// stages would actually overflow, rather than at some guessed viewport width -
+// a long name/font or a short-but-wide window can overflow just as easily as
+// a narrow phone.
+const pipeline = document.querySelector(".pipeline");
+
+if (pipeline) {
+  const updatePipelineLayout = () => {
+    pipeline.classList.remove("pipeline--vertical");
+
+    // Don't use scrollWidth here: the "that's me now!" annotation on the
+    // current node is absolutely positioned and pokes out past the row on
+    // purpose (it's allowed to bleed into the surrounding whitespace), which
+    // would otherwise read as overflow that isn't really there. Instead sum
+    // what the row actually needs - nodes at their natural width (they never
+    // shrink or grow) plus each link's CSS min-width (the narrowest a link
+    // can go before nodes start colliding) - and compare to the space available.
+    const cs = getComputedStyle(pipeline);
+    let required = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    pipeline.querySelectorAll(".pipeline__node").forEach((node) => {
+      required += node.offsetWidth;
+    });
+    pipeline.querySelectorAll(".pipeline__link").forEach((link) => {
+      required += parseFloat(getComputedStyle(link).minWidth) || 0;
+    });
+
+    const overflowing = required > pipeline.clientWidth + 1;
+    pipeline.classList.toggle("pipeline--vertical", overflowing);
+  };
+
+  updatePipelineLayout();
+
+  let resizeFrame = null;
+  const scheduleUpdate = () => {
+    if (resizeFrame) cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(updatePipelineLayout);
+  };
+
+  window.addEventListener("resize", scheduleUpdate);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(updatePipelineLayout);
+  }
+}
+
 // Stack <-> experience filtering
 const stackChips = document.querySelectorAll(".stack .chip");
 const stackContainer = document.querySelector(".stack");
