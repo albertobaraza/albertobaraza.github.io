@@ -976,7 +976,10 @@ main {
   .hero__eyebrow {
     position: static;
     display: inline-block;
-    margin: 0 0 0.75rem;
+    /* The note's own scale(1.25)/rotate(6deg) grows it past its box on every
+       side, so a flush 0 top margin still reads as covering the line above -
+       give it clearance instead of butting against the heading. */
+    margin: 1rem 0 0.75rem;
   }
 
   .project-card__thumb {
