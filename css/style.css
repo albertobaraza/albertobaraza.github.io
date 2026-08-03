@@ -965,8 +965,23 @@ main {
 
 @media (max-width: 600px) {
   .timeline__item {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
+    /* Switch from grid to a float layout: a grid column reserves its width
+       for the full row height, leaving a tall empty gutter next to the
+       bullet list below. Floating the date lets it sit beside just the
+       title/company (which wrap around it) while everything after clears
+       it and spans the full width. flow-root keeps the float contained
+       within this list item instead of bleeding into the next one. */
+    display: flow-root;
+  }
+
+  .timeline__meta {
+    float: right;
+    width: 68px;
+    margin: 3px 0 0.5rem 0.75rem;
+  }
+
+  .timeline__period {
+    font-size: 0.72rem;
   }
 
   .nav__links {
