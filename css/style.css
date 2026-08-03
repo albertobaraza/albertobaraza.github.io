@@ -265,9 +265,14 @@ main {
 
 .hero__eyebrow {
   position: absolute;
-  top: -1.5rem;
+  top: -1rem;
   left: 100%;
-  margin: 0 0 0 12rem;
+  /* Slightly negative so the note tucks against the end of the name, instead
+     of the fixed 12rem gap that only read as "next to the name" on wide
+     screens and pushed it off-screen on phones. Pulls further left on narrow
+     viewports (where the note has less room before the edge of the screen)
+     and eases back to a small overlap once there's space (~800px+). */
+  margin: 0 0 0 clamp(-1.25rem, -2rem + 3.5vw, -0.25rem);
   z-index: 1000;
   cursor: grab;
   touch-action: none;
@@ -283,15 +288,18 @@ main {
   position: relative;
   display: inline-block;
   font-family: var(--font-hand);
-  font-size: 1.4rem;
+  /* Shrinks with the viewport so the note keeps fitting beside the name
+     rather than overflowing off the edge of narrow screens; ceilings out
+     at the original 1.4rem once there's room (~780px+). */
+  font-size: clamp(0.55rem, 3vw, 1.4rem);
   line-height: 1.2;
   color: #14290a;
   background: linear-gradient(160deg, #ecfccb 0%, #86efac 55%, #4ade80 100%);
-  padding: 0.6rem 1.1rem 1rem 0.9rem;
-  transform: rotate(6deg) scale(1.25);
+  padding: 0.6em 1.1em 1em 0.9em;
+  transform: rotate(6deg) scale(1.05);
   filter: drop-shadow(3px 4px 4px rgba(0, 0, 0, 0.3)) drop-shadow(6px 10px 16px rgba(0, 0, 0, 0.4));
   white-space: nowrap;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.65em), calc(100% - 0.65em) 100%, 0 100%);
 }
 
 .hero__eyebrow-note::after {
@@ -299,8 +307,8 @@ main {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 14px;
-  height: 14px;
+  width: 0.65em;
+  height: 0.65em;
   background: linear-gradient(135deg, #86efac 0%, #16803c 100%);
   clip-path: polygon(100% 0, 0 100%, 100% 100%);
   box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.35);
@@ -967,19 +975,6 @@ main {
 
   .nav__links a {
     font-size: 0.8rem;
-  }
-
-  .hero__name-row {
-    display: block;
-  }
-
-  .hero__eyebrow {
-    position: static;
-    display: inline-block;
-    /* The note's own scale(1.25)/rotate(6deg) grows it past its box on every
-       side, so a flush 0 top margin still reads as covering the line above -
-       give it clearance instead of butting against the heading. */
-    margin: 1rem 0 0.75rem;
   }
 
   .project-card__thumb {
