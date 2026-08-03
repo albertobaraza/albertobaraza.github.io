@@ -4,7 +4,7 @@
 const translations = {
   en: {
     "meta-title": "Alberto Baraza, Data Engineer",
-    "meta-description": "Alberto Baraza, Senior Data Engineer. Clean pipelines, solid architecture, systems that don't break.",
+    "meta-description": "Alberto Baraza, Senior Data Engineer. Clean pipelines, solid architecture, and systems that don't break.",
 
     "nav-about": "About",
     "nav-projects": "Projects",
@@ -24,7 +24,7 @@ const translations = {
     "about-title": "About",
     "about-text": `
         I'm an engineer who ended up specializing in data: small Bash, SQL, Java, and Python
-        scripts turned into full workflows, then entire projects, and now into broader data
+        scripts turned into full workflows, then into entire projects, and now into broader data
         architectures. I lead technical initiatives on a lean team, setting standards and owning the
         roadmap end-to-end.
         What ties it together: I like systems
@@ -91,7 +91,7 @@ const translations = {
     "tl-kimitecan-aria": "Oct 2019 – Oct 2020",
     "tl-kimitecan-role": `Junior Data Analyst <span class="timeline__badge">Internship</span>`,
     "tl-kimitecan-bullets": `
-                  <li>Carried out Bachelor's thesis applying Business Analytics to bio-sustainable techniques and circular economy</li>
+                  <li>Carried out my Bachelor's thesis, applying Business Analytics to bio-sustainable techniques and the circular economy</li>
                   <li>Built Power BI dashboards for internal use and developed JDBC-based tools for data management between DBMS</li>
                   <li>Worked as SQL programmer writing custom queries using SAP B1</li>
                 `,
@@ -100,7 +100,7 @@ const translations = {
     "tl-stuttgart-role": `Business Intelligence Analyst <span class="timeline__badge">Internship</span>`,
     "tl-stuttgart-bullets": `
                   <li>Collaborated with Microsoft Germany on a data-streaming project; performed ETL from source systems into data marts</li>
-                  <li>Implemented Star and Snowflake schemas and analysed multidimensional data with OLAP tools</li>
+                  <li>Implemented Star and Snowflake schemas and analyzed multidimensional data with OLAP tools</li>
                   <li>Built dashboards and reports with Power BI, Power Pivot, and SQL Server Analysis Services (SSAS)</li>
                 `,
 
@@ -123,12 +123,12 @@ const translations = {
 
   es: {
     "meta-title": "Alberto Baraza, Ingeniero de Datos",
-    "meta-description": "Alberto Baraza, Ingeniero de Datos Senior. Pipelines limpios, arquitectura sólida, sistemas que no fallan.",
+    "meta-description": "Alberto Baraza, Ingeniero de Datos Senior. Pipelines limpios, arquitectura sólida y sistemas que no fallan.",
 
     "nav-about": "Sobre mí",
     "nav-projects": "Proyectos",
     "nav-experience": "Experiencia",
-    "nav-stack": "Stack",
+    "nav-stack": "Tecnologías",
     "nav-contact": "Contacto",
 
     "hero-hi": `¡Hola! <span class="hero__eyebrow-hand">👋</span>`,
@@ -142,13 +142,13 @@ const translations = {
 
     "about-title": "Sobre mí",
     "about-text": `
-        Soy un ingeniero que terminó especializándose en datos: pequeños scripts de Bash,
+        Soy un ingeniero que acabó especializándose en datos: pequeños scripts de Bash,
         SQL, Java y Python se convirtieron en flujos de trabajo completos, luego en
-        proyectos enteros, y ahora en arquitecturas de datos más amplias. Lidero
+        proyectos enteros y ahora en arquitecturas de datos más amplias. Lidero
         iniciativas técnicas en un equipo reducido, definiendo estándares y siendo
         responsable de la hoja de ruta de principio a fin.
-        Lo que lo une todo: me gustan los sistemas
-        que fallan de forma ruidosa, se recuperan limpiamente y no necesitan que los esté vigilando.
+        El hilo conductor: me gustan los sistemas
+        que fallan de forma ruidosa, se recuperan limpiamente y no necesitan que les haga de niñera.
       `,
 
     "pl-bi": "Analista BI",
@@ -161,7 +161,7 @@ const translations = {
     "pl-hint": "Mi carrera, un solo pipeline. Haz clic en una etapa para ir a ella.",
 
     "projects-title": "Proyectos",
-    "proj-wam-desc": "Juego de golpea-al-topo para navegador con marcador global.",
+    "proj-wam-desc": "Juego de whack-a-mole para navegador con marcador global.",
     "proj-more-title": `Más en GitHub <span class="project-card__arrow">↗</span>`,
     "proj-more-desc": "Explora el resto de mis repositorios y contribuciones.",
     "proj-no-description": "Sin descripción.",
@@ -185,7 +185,7 @@ const translations = {
     "tl-glovo2-start": "Ene 2022",
     "tl-glovo2-role": "Ingeniero de Datos II",
     "tl-glovo2-bullets": `
-              <li>Responsable del ciclo de vida completo (diseño → despliegue → mantenimiento) de pipelines de datos de fintech usando Apache Spark, Apache Airflow, Great Expectations, AWS, Docker y GitHub Actions</li>
+              <li>Fui responsable del ciclo de vida completo (diseño → despliegue → mantenimiento) de pipelines de datos de fintech usando Apache Spark, Apache Airflow, Great Expectations, AWS, Docker y GitHub Actions</li>
               <li>Mentoricé a ingenieros junior e impulsé una cultura de equipo de intercambio de conocimiento y mejora continua</li>
               <li>Contribuí a migrar el dominio analítico de fintech de un monolito a una arquitectura de data mesh / data products</li>
             `,
@@ -211,8 +211,8 @@ const translations = {
     "tl-kimitecan-aria": "Oct 2019 – Oct 2020",
     "tl-kimitecan-role": `Analista de Datos Junior <span class="timeline__badge">Prácticas</span>`,
     "tl-kimitecan-bullets": `
-                  <li>Realicé el Trabajo de Fin de Grado aplicando Business Analytics a técnicas biosostenibles y economía circular</li>
-                  <li>Construí dashboards de Power BI para uso interno y desarrollé herramientas basadas en JDBC para la gestión de datos entre sistemas de bases de datos</li>
+                  <li>Realicé el Trabajo de Fin de Grado, aplicando Business Analytics a técnicas biosostenibles y la economía circular</li>
+                  <li>Construí dashboards de Power BI para uso interno y desarrollé herramientas basadas en JDBC para la gestión de datos entre distintos SGBD</li>
                   <li>Trabajé como programador SQL escribiendo consultas personalizadas usando SAP B1</li>
                 `,
 
