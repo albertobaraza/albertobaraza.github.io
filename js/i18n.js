@@ -237,7 +237,7 @@ const translations = {
     "theme-to-dark": "Cambiar a tema oscuro",
     "theme-to-light": "Cambiar a tema claro",
     "lang-to-es": "Cambiar a español",
-    "lang-to-en": "Switch to English",
+    "lang-to-en": "Cambiar a inglés",
     "copied": "¡Copiado!",
   },
 };
