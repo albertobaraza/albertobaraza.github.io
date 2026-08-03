@@ -142,7 +142,7 @@ document.querySelectorAll(".timeline__toggle").forEach((btn) => {
     const item = btn.closest(".timeline__item");
     const expanded = item.classList.toggle("is-expanded");
     btn.setAttribute("aria-expanded", String(expanded));
-    btn.querySelector("span").textContent = expanded ? "Hide details" : "Show details";
+    btn.querySelector("span").textContent = window.i18n.t(expanded ? "tl-hide-details" : "tl-show-details");
   });
 });
 
@@ -234,6 +234,9 @@ if (pipeline) {
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(updatePipelineLayout);
   }
+  // Node label widths change with the language (translations apply after this
+  // runs, and again on every toggle), so re-measure whenever they do.
+  document.addEventListener("langchange", updatePipelineLayout);
 }
 
 // Stack <-> experience filtering
@@ -298,7 +301,7 @@ if (navigator.clipboard) {
       const email = el.href.replace(/^mailto:/, "");
       navigator.clipboard.writeText(email).then(() => {
         const label = el.dataset.defaultLabel;
-        el.textContent = "Copied!";
+        el.textContent = window.i18n.t("copied");
         el.classList.add("is-copied");
         clearTimeout(el._copyTimeout);
         el._copyTimeout = setTimeout(() => {
@@ -321,10 +324,11 @@ const getEffectiveTheme = () => {
 
 const updateToggleLabel = () => {
   const current = getEffectiveTheme();
-  themeToggle.setAttribute("aria-label", current === "light" ? "Switch to dark theme" : "Switch to light theme");
+  themeToggle.setAttribute("aria-label", window.i18n.t(current === "light" ? "theme-to-dark" : "theme-to-light"));
 };
 
 updateToggleLabel();
+document.addEventListener("langchange", updateToggleLabel);
 
 themeToggle.addEventListener("click", () => {
   const next = getEffectiveTheme() === "light" ? "dark" : "light";
@@ -498,7 +502,7 @@ if (projectsContainer) {
           title.appendChild(arrow);
 
           const desc = document.createElement("p");
-          desc.textContent = repo.description || "No description provided.";
+          desc.textContent = repo.description || window.i18n.t("proj-no-description");
 
           const body = document.createElement("div");
           body.className = "project-card__body";
