@@ -1012,11 +1012,13 @@ main {
   }
 
   .nav__links {
-    gap: 0.85rem;
-  }
-
-  .nav__links a {
-    font-size: 0.8rem;
+    /* Even English's shortest link set no longer fits alongside the brand
+       mark and both toggle buttons below this width (nav content needs
+       ~450-500px+; verified there's no scroll affordance if it overflows -
+       content just clips silently past the viewport edge). Sections are
+       still reachable by scrolling, so drop the quick-jump links rather
+       than let them crowd out the toggles that have no other way in. */
+    display: none;
   }
 
   .project-card__thumb {
