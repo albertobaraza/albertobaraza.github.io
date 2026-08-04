@@ -290,88 +290,17 @@ main {
   display: inline-block;
 }
 
-.hero__eyebrow {
+.hero__note {
   position: absolute;
-  top: -1rem;
+  top: -0.6rem;
   left: 100%;
-  /* Slightly negative so the note tucks against the end of the name, instead
-     of the fixed 12rem gap that only read as "next to the name" on wide
-     screens and pushed it off-screen on phones. Pulls further left on narrow
-     viewports (where the note has less room before the edge of the screen)
-     and eases back to a small overlap once there's space (~800px+). */
   margin: 0 0 0 clamp(0rem, -0.5rem + 3.5vw, 1rem);
-  z-index: 1000;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-}
-
-.hero__eyebrow.is-dragging {
-  cursor: grabbing;
-  z-index: 1001;
-}
-
-.hero__eyebrow-note {
-  position: relative;
-  display: inline-block;
   font-family: var(--font-hand);
-  /* Shrinks with the viewport so the note keeps fitting beside the name
-     rather than overflowing off the edge of narrow screens; ceilings out
-     at the original 1.4rem once there's room (~780px+). */
-  font-size: clamp(0.55rem, 3vw, 1.4rem);
-  line-height: 1.2;
-  color: #14290a;
-  background: linear-gradient(160deg, #ecfccb 0%, #86efac 55%, #4ade80 100%);
-  padding: 0.6em 1.1em 1em 0.9em;
-  transform: rotate(6deg) scale(1.05);
-  filter: drop-shadow(3px 4px 4px rgba(0, 0, 0, 0.3)) drop-shadow(6px 10px 16px rgba(0, 0, 0, 0.4));
+  font-size: clamp(0.9rem, 3vw, 1.5rem);
+  color: var(--accent);
+  transform: rotate(-20deg);
   white-space: nowrap;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.65em), calc(100% - 0.65em) 100%, 0 100%);
-}
-
-.hero__eyebrow-note::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 0.65em;
-  height: 0.65em;
-  background: linear-gradient(135deg, #86efac 0%, #16803c 100%);
-  clip-path: polygon(100% 0, 0 100%, 100% 100%);
-  box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.35);
-}
-
-.hero__eyebrow-hand {
-  position: relative;
-  display: inline-block;
-}
-
-.clap-pop {
-  position: fixed;
-  z-index: 1002;
-  transform: translate(-50%, 0) scale(0.4) rotate(-10deg);
-  font-size: 1.4rem;
   pointer-events: none;
-  animation: clapPop 0.55s ease-out forwards;
-}
-
-@keyframes clapPop {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 0) scale(0.4) rotate(-10deg);
-  }
-  30% {
-    opacity: 1;
-    transform: translate(-50%, -16px) scale(1.35) rotate(10deg);
-  }
-  60% {
-    opacity: 1;
-    transform: translate(-50%, -20px) scale(1.1) rotate(-8deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -34px) scale(0.9) rotate(0deg);
-  }
 }
 
 .hero__name {
@@ -1025,6 +954,14 @@ main {
     width: 48px;
     height: 48px;
     font-size: 0.85rem;
+  }
+
+  .hero__note {
+    /* Absolute + left:100% pushes it off-screen once the name fills most of
+       a narrow viewport, so drop it into normal flow underneath instead. */
+    position: static;
+    display: block;
+    margin: 0.25rem 0 0 0.25rem;
   }
 }
 

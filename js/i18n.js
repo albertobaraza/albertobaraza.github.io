@@ -12,7 +12,7 @@ const translations = {
     "nav-stack": "Stack",
     "nav-contact": "Contact",
 
-    "hero-hi": `Hi there! <span class="hero__eyebrow-hand">👋</span>`,
+    "hero-hi": "Hello there!",
     "hero-title": "Senior Data Engineer",
     "hero-lede": `
         Well-defined workflows and a robust architecture. The foundation of a great project.
@@ -132,7 +132,7 @@ const translations = {
     "nav-stack": "Tecnologías",
     "nav-contact": "Contacto",
 
-    "hero-hi": `¡Hola! <span class="hero__eyebrow-hand">👋</span>`,
+    "hero-hi": "¡Hola!",
     "hero-title": "Ingeniero de Datos Senior",
     "hero-lede": `
         Flujos de trabajo bien definidos y una arquitectura robusta. La base de un gran proyecto.
