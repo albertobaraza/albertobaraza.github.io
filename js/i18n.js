@@ -15,16 +15,17 @@ const translations = {
     "hero-hi": `Hi there! <span class="hero__eyebrow-hand">👋</span>`,
     "hero-title": "Senior Data Engineer",
     "hero-lede": `
-        I care about clean pipelines, solid architecture, and systems that just don't break.
-        I like working close to the hard problems, mentoring people around me, and building
-        things that last.
+        Well-defined workflows and a robust architecture. The foundation of a great project.
+        I like working close to the hard problems,
+        mentoring people around me, and building with a clear purpose.
       `,
     "hero-email-btn": "Email",
 
     "about-title": "About",
     "about-text": `
-        I'm an engineer who ended up specializing in data: small Bash, SQL, Java, and Python
-        scripts turned into full workflows, then into entire projects, and now into broader data
+        I'm an engineer who ended up specializing in data.<br>
+        Small Bash, SQL, Java, and Python
+        scripts first turned into end-to-end workflows, then into entire projects, and now into broader data
         architectures. I lead technical initiatives on a lean team, setting standards and owning the
         roadmap end-to-end.
         What ties it together: I like systems
@@ -92,7 +93,7 @@ const translations = {
     "tl-kimitecan-role": `Junior Data Analyst <span class="timeline__badge">Internship</span>`,
     "tl-kimitecan-bullets": `
                   <li>Carried out my Bachelor's thesis, applying Business Analytics to bio-sustainable techniques and the circular economy</li>
-                  <li>Built Power BI dashboards for internal use and developed JDBC-based tools for data management between DBMS</li>
+                  <li>Built Power BI dashboards for internal use and developed JDBC-based tools for data management across different DBMS platforms</li>
                   <li>Worked as SQL programmer writing custom queries using SAP B1</li>
                 `,
 
@@ -117,7 +118,7 @@ const translations = {
     "theme-to-dark": "Switch to dark theme",
     "theme-to-light": "Switch to light theme",
     "lang-to-es": "Switch to Spanish",
-    "lang-to-en": "Cambiar a inglés",
+    "lang-to-en": "Switch to English",
     "copied": "Copied!",
   },
 
@@ -134,20 +135,21 @@ const translations = {
     "hero-hi": `¡Hola! <span class="hero__eyebrow-hand">👋</span>`,
     "hero-title": "Ingeniero de Datos Senior",
     "hero-lede": `
-        Me importan los pipelines limpios, la arquitectura sólida y los sistemas que
-        simplemente no fallan. Me gusta trabajar cerca de los problemas difíciles,
-        mentorizar a la gente que me rodea y construir cosas que perduren.
+        Flujos de trabajo bien definidos y una arquitectura robusta. La base de un gran proyecto.
+        Me gusta trabajar cerca de los problemas difíciles,
+        mentorizar a la gente que me rodea y construir con un objetivo claro.
       `,
     "hero-email-btn": "Correo",
 
     "about-title": "Sobre mí",
     "about-text": `
-        Soy un ingeniero que acabó especializándose en datos: pequeños scripts de Bash,
-        SQL, Java y Python se convirtieron en flujos de trabajo completos, luego en
+        Soy un ingeniero de software que acabó especializándose en datos.<br>
+        Los pequeños scripts de Bash,
+        SQL, Java y Python, poco a poco se convirtieron en flujos de trabajo completos, luego en
         proyectos enteros y ahora en arquitecturas de datos más amplias. Lidero
         iniciativas técnicas en un equipo reducido, definiendo estándares y siendo
         responsable de la hoja de ruta de principio a fin.
-        El hilo conductor: me gustan los sistemas
+        ¿El hilo conductor? Me gustan los sistemas
         que fallan de forma ruidosa, se recuperan limpiamente y no necesitan que les haga de niñera.
       `,
 
