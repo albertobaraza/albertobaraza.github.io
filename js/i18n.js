@@ -113,7 +113,7 @@ const translations = {
     "stack-reporting": "Reporting &amp; Monitoring",
     "stack-hint": "Click a tool to see where I've used it.",
 
-    "footer-cta": "Let's talk data.",
+    "footer-cta": "Let's get to work.",
 
     "theme-to-dark": "Switch to dark theme",
     "theme-to-light": "Switch to light theme",
@@ -234,7 +234,7 @@ const translations = {
     "stack-reporting": "Reporting y Monitorización",
     "stack-hint": "Haz clic en una herramienta para ver dónde la he usado.",
 
-    "footer-cta": "Hablemos de datos.",
+    "footer-cta": "Manos a la obra.",
 
     "theme-to-dark": "Cambiar a tema oscuro",
     "theme-to-light": "Cambiar a tema claro",
