@@ -299,7 +299,7 @@ main {
      screens and pushed it off-screen on phones. Pulls further left on narrow
      viewports (where the note has less room before the edge of the screen)
      and eases back to a small overlap once there's space (~800px+). */
-  margin: 0 0 0 clamp(-1.25rem, -2rem + 3.5vw, -0.25rem);
+  margin: 0 0 0 clamp(0rem, -0.5rem + 3.5vw, 1rem);
   z-index: 1000;
   cursor: grab;
   touch-action: none;
