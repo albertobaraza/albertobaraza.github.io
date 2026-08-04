@@ -159,7 +159,7 @@ const translations = {
     "pl-de1": "Ing. Datos I",
     "pl-de2": "Ing. Datos II",
     "pl-senior": "Ing. Datos Sr",
-    "pl-annotation": "¡ese soy yo ahora!",
+    "pl-annotation": "por aquí vamos",
     "pl-hint": "Mi carrera, un solo pipeline. Haz clic en una etapa para ir a ella.",
 
     "projects-title": "Proyectos",
