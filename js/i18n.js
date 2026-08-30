@@ -43,7 +43,8 @@ const translations = {
 
     "projects-title": "Projects",
     "proj-more-title": `More on GitHub <span class="project-card__arrow">↗</span>`,
-    "proj-more-desc": "Browse the rest of my repositories and contributions.",
+    "proj-more-desc": "View my repositories and contributions on GitHub.",
+    "proj-more-desc-live": "Browse the rest of my repositories and contributions.",
     "proj-no-description": "No description provided.",
 
     "experience-title": "Experience",
@@ -163,7 +164,8 @@ const translations = {
 
     "projects-title": "Proyectos",
     "proj-more-title": `Más en GitHub <span class="project-card__arrow">↗</span>`,
-    "proj-more-desc": "Explora el resto de mis repositorios y contribuciones.",
+    "proj-more-desc": "Mira mis repositorios y contribuciones en GitHub.",
+    "proj-more-desc-live": "Explora el resto de mis repositorios y contribuciones.",
     "proj-no-description": "Sin descripción.",
 
     "experience-title": "Experiencia",

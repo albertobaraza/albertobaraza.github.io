@@ -352,8 +352,10 @@ const buildMetaRow = (repo) => {
   const items = [];
   if (repo.pushed_at) {
     const updated = new Date(repo.pushed_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-    items.push(["icon-calendar", `Updated ${updated}`]);
+    items.push(["icon-calendar", `Last commit: ${updated}`]);
   }
+  const license = repo.license?.spdx_id;
+  if (license && license !== "NOASSERTION") items.push(["icon-license", license]);
 
   if (!items.length) return null;
 
@@ -408,6 +410,14 @@ if (projectsContainer) {
 
       return Promise.all(top.map((repo) => fetchTopLanguages(repo))).then((stats) => {
         const pinnedCard = projectsContainer.querySelector(".project-card--pinned");
+
+        // Now that live cards sit above it, "browse the rest" reads correctly
+        // instead of the plain fallback wording used when it's the only card.
+        const pinnedDesc = pinnedCard?.querySelector('[data-i18n="proj-more-desc"]');
+        if (pinnedDesc) {
+          pinnedDesc.dataset.i18n = "proj-more-desc-live";
+          pinnedDesc.innerHTML = window.i18n.t("proj-more-desc-live");
+        }
 
         top.forEach((repo, i) => {
           const languages = stats[i];
