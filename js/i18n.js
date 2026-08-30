@@ -15,7 +15,7 @@ const translations = {
     "hero-hi": "Hello there!",
     "hero-title": "Senior Data Engineer",
     "hero-lede": `
-        Well-defined workflows and a robust architecture. The foundation of a great project.
+        Well-defined workflows and a clear objective. The foundation of a great project.
         I like working close to the hard problems,
         mentoring people around me, and building with a clear purpose.
       `,
@@ -23,13 +23,13 @@ const translations = {
 
     "about-title": "About",
     "about-text": `
-        I'm an engineer who ended up specializing in data.<br>
+        I started out studying software engineering, and step by step I've shaped myself into a data engineer.<br>
         Small Bash, SQL, Java, and Python
         scripts first turned into end-to-end workflows, then into entire projects, and now into broader data
         architectures. I lead technical initiatives on a lean team, setting standards and owning the
         roadmap end-to-end.
         What ties it together: I like systems
-        that fail loudly, recover cleanly, and don't need me to babysit them.
+        that fail loudly, recover cleanly, and don't need constant maintenance.
       `,
 
     "pl-bi": "BI Analyst",
@@ -135,22 +135,22 @@ const translations = {
     "hero-hi": "¡Hola!",
     "hero-title": "Ingeniero de Datos Senior",
     "hero-lede": `
-        Flujos de trabajo bien definidos y una arquitectura robusta. La base de un gran proyecto.
+        Flujos de trabajo bien definidos y un objetivo claro. La base de un gran proyecto.
         Me gusta trabajar cerca de los problemas difíciles,
-        mentorizar a la gente que me rodea y construir con un objetivo claro.
+        mentorizar a la gente que me rodea y construir con un propósito claro.
       `,
     "hero-email-btn": "Correo",
 
     "about-title": "Sobre mí",
     "about-text": `
-        Soy un ingeniero de software que acabó especializándose en datos.<br>
+        Empecé estudiando ingeniería del software y, paso a paso, me he ido formando como ingeniero de datos.<br>
         Los pequeños scripts de Bash,
         SQL, Java y Python, poco a poco se convirtieron en flujos de trabajo completos, luego en
         proyectos enteros y ahora en arquitecturas de datos más amplias. Lidero
         iniciativas técnicas en un equipo reducido, definiendo estándares y siendo
         responsable de la hoja de ruta de principio a fin.
         ¿El hilo conductor? Me gustan los sistemas
-        que fallan de forma ruidosa, se recuperan limpiamente y no necesitan que les haga de niñera.
+        que fallan de forma ruidosa, se recuperan limpiamente y no necesitan mantenimiento constante.
       `,
 
     "pl-bi": "Analista BI",
