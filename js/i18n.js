@@ -42,7 +42,6 @@ const translations = {
     "pl-hint": "My career, one pipeline. Click a stage to jump to it.",
 
     "projects-title": "Projects",
-    "proj-wam-desc": "Browser whack-a-mole game with a global leaderboard.",
     "proj-more-title": `More on GitHub <span class="project-card__arrow">↗</span>`,
     "proj-more-desc": "Browse the rest of my repositories and contributions.",
     "proj-no-description": "No description provided.",
@@ -163,7 +162,6 @@ const translations = {
     "pl-hint": "Mi carrera, un solo pipeline. Haz clic en una etapa para ir a ella.",
 
     "projects-title": "Proyectos",
-    "proj-wam-desc": "Juego de whack-a-mole para navegador con marcador global.",
     "proj-more-title": `Más en GitHub <span class="project-card__arrow">↗</span>`,
     "proj-more-desc": "Explora el resto de mis repositorios y contribuciones.",
     "proj-no-description": "Sin descripción.",
