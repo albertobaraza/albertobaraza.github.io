@@ -889,6 +889,22 @@ main {
   opacity: 0.7;
 }
 
+.project-card__ring {
+  position: relative;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+
+.project-card__ring::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+}
+
 /* Footer */
 
 .footer {
@@ -954,6 +970,15 @@ main {
     width: 48px;
     height: 48px;
     font-size: 0.85rem;
+  }
+
+  .project-card__ring {
+    width: 40px;
+    height: 40px;
+  }
+
+  .project-card__ring::after {
+    inset: 7px;
   }
 
   .hero__note {

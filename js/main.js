@@ -274,32 +274,11 @@ document.querySelectorAll(".project-card").forEach(addSpotlight);
 const projectsContainer = document.querySelector(".projects");
 const EXCLUDED_REPOS = new Set(["albertobaraza", "albertobaraza.github.io"]);
 
-// Total commit count via the `rel="last"` page number of a per_page=1 request
-// (avoids paging through full commit history just to count it).
-const fetchCommitCount = (repo) => {
-  const commitsUrl = repo.commits_url.replace("{/sha}", "");
-  return fetch(`${commitsUrl}?per_page=1`)
-    .then((res) => {
-      if (!res.ok) return null;
-      const link = res.headers.get("link");
-      if (link) {
-        const match = link.match(/[?&]page=(\d+)>;\s*rel="last"/);
-        if (match) return Number(match[1]);
-      }
-      return res.json().then((commits) => commits.length);
-    })
-    .catch(() => null);
-};
-
+// Returns [name, bytes] pairs sorted by share of the repo, largest first.
 const fetchTopLanguages = (repo) =>
   fetch(repo.languages_url)
     .then((res) => (res.ok ? res.json() : {}))
-    .then((bytesByLanguage) =>
-      Object.entries(bytesByLanguage)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 2)
-        .map(([name]) => name)
-    )
+    .then((bytesByLanguage) => Object.entries(bytesByLanguage).sort((a, b) => b[1] - a[1]))
     .catch(() => []);
 
 // GitHub linguist colors for common languages; unlisted languages fall back to the site accent.
@@ -349,7 +328,7 @@ const buildThumb = (repo, languages) => {
   const thumb = document.createElement("div");
   thumb.className = "project-card__thumb";
 
-  const color = LANGUAGE_COLORS[languages[0]] || DEFAULT_THUMB_COLOR;
+  const color = LANGUAGE_COLORS[languages[0]?.[0]] || DEFAULT_THUMB_COLOR;
   thumb.style.background = color;
 
   const label = document.createElement("span");
@@ -369,12 +348,12 @@ const buildThumb = (repo, languages) => {
   return thumb;
 };
 
-const buildMetaRow = (repo, commitCount, languages) => {
+const buildMetaRow = (repo) => {
   const items = [];
-  const year = new Date(repo.created_at).getFullYear();
-  if (year) items.push(["icon-calendar", String(year)]);
-  if (commitCount) items.push(["icon-commit", `${commitCount} commit${commitCount === 1 ? "" : "s"}`]);
-  if (languages.length) items.push(["icon-code", languages.join(" · ")]);
+  if (repo.pushed_at) {
+    const updated = new Date(repo.pushed_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    items.push(["icon-calendar", `Updated ${updated}`]);
+  }
 
   if (!items.length) return null;
 
@@ -389,24 +368,49 @@ const buildMetaRow = (repo, commitCount, languages) => {
   return meta;
 };
 
+// Donut chart of per-language byte share, using the same GitHub linguist
+// colors as the thumbnail. Long tails beyond MAX_SLICES collapse into "Other".
+const MAX_RING_SLICES = 5;
+const buildLanguageRing = (languages) => {
+  const total = languages.reduce((sum, [, bytes]) => sum + bytes, 0);
+  if (!total) return null;
+
+  const top = languages.slice(0, MAX_RING_SLICES);
+  const otherBytes = languages.slice(MAX_RING_SLICES).reduce((sum, [, bytes]) => sum + bytes, 0);
+  const slices = otherBytes > 0 ? [...top, ["Other", otherBytes]] : top;
+
+  let cursor = 0;
+  const stops = slices.map(([name, bytes]) => {
+    const start = (cursor / total) * 100;
+    cursor += bytes;
+    const end = (cursor / total) * 100;
+    const color = LANGUAGE_COLORS[name] || DEFAULT_THUMB_COLOR;
+    return `${color} ${start.toFixed(2)}% ${end.toFixed(2)}%`;
+  });
+
+  const ring = document.createElement("div");
+  ring.className = "project-card__ring";
+  ring.style.background = `conic-gradient(${stops.join(", ")})`;
+  ring.title = slices.map(([name, bytes]) => `${name} ${((bytes / total) * 100).toFixed(1)}%`).join(" · ");
+  return ring;
+};
+
 if (projectsContainer) {
   fetch("https://api.github.com/users/albertobaraza/repos?sort=pushed&per_page=100")
     .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
     .then((repos) => {
       const top = repos
         .filter((repo) => !repo.fork && !repo.private && !repo.archived && !EXCLUDED_REPOS.has(repo.name))
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
         .slice(0, 4);
 
       if (!top.length) return;
 
-      return Promise.all(
-        top.map((repo) => Promise.all([fetchCommitCount(repo), fetchTopLanguages(repo)]))
-      ).then((stats) => {
-        projectsContainer.innerHTML = "";
+      return Promise.all(top.map((repo) => fetchTopLanguages(repo))).then((stats) => {
+        const pinnedCard = projectsContainer.querySelector(".project-card--pinned");
 
         top.forEach((repo, i) => {
-          const [commitCount, languages] = stats[i];
+          const languages = stats[i];
 
           const card = document.createElement("a");
           card.className = "project-card reveal is-visible";
@@ -429,17 +433,18 @@ if (projectsContainer) {
           body.className = "project-card__body";
           body.append(title, desc);
 
-          const meta = buildMetaRow(repo, commitCount, languages);
+          const meta = buildMetaRow(repo);
           if (meta) body.appendChild(meta);
 
-          card.append(buildThumb(repo, languages), body);
+          const ring = buildLanguageRing(languages);
+          card.append(buildThumb(repo, languages), body, ...(ring ? [ring] : []));
 
           addSpotlight(card);
-          projectsContainer.appendChild(card);
+          projectsContainer.insertBefore(card, pinnedCard);
         });
       });
     })
     .catch(() => {
-      // Network error, rate limit, or no JS: static fallback cards stay in place
+      // Network error, rate limit, or no JS: the pinned "More on GitHub" card stays as-is
     });
 }
