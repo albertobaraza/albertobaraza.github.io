@@ -136,94 +136,64 @@ a:hover {
   color: var(--text);
 }
 
-.theme-toggle {
-  position: relative;
-  width: 32px;
+/* Segmented controls (theme, language): a shared pill-shaped outer border
+   with no gap between segments, so they read as one connected control
+   rather than independent buttons. The container owns the rounding and
+   clips its children via overflow-hidden; each button contributes only a
+   fill color plus a divider (skipped on the first segment). */
+.theme-toggle,
+.lang-toggle {
+  display: inline-flex;
   height: 32px;
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.theme-toggle__btn,
+.lang-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  border: none;
+  border-left: 1px solid var(--border);
+  background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   padding: 0;
   appearance: none;
-  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.theme-toggle:hover {
-  border-color: var(--accent);
+.theme-toggle__btn:first-child,
+.lang-toggle__btn:first-child {
+  border-left: none;
+}
+
+.theme-toggle__btn:hover,
+.lang-toggle__btn:hover {
   color: var(--text);
-  transform: translateY(-1px);
 }
 
-.theme-toggle__icon {
-  position: absolute;
+.theme-toggle__btn.is-active,
+.lang-toggle__btn.is-active {
+  background: var(--accent);
+  color: var(--btn-primary-text);
+}
+
+.theme-toggle__btn svg {
   width: 16px;
   height: 16px;
-  transition: opacity 0.3s ease, transform 0.4s ease;
 }
 
-.theme-toggle__icon--sun {
-  opacity: 0;
-  transform: scale(0.4) rotate(-90deg);
-}
-
-.theme-toggle__icon--moon {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-}
-
-:root[data-theme="light"] .theme-toggle__icon--sun {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-}
-
-:root[data-theme="light"] .theme-toggle__icon--moon {
-  opacity: 0;
-  transform: scale(0.4) rotate(90deg);
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .theme-toggle__icon--sun {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-
-  :root:not([data-theme="dark"]) .theme-toggle__icon--moon {
-    opacity: 0;
-    transform: scale(0.4) rotate(90deg);
-  }
-}
-
-.lang-toggle {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--bg-elevated);
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0;
-  appearance: none;
+.lang-toggle__btn {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-
-.lang-toggle:hover {
-  border-color: var(--accent);
-  color: var(--text);
-  transform: translateY(-1px);
 }
 
 /* Layout */

@@ -234,28 +234,39 @@ if (navigator.clipboard) {
   });
 }
 
-// Manual dark/light theme toggle
-const themeToggle = document.getElementById("theme-toggle");
+// Manual dark/light/system theme toggle. "system" means no explicit
+// override: no data-theme attribute, no localStorage entry, and the
+// prefers-color-scheme media queries in the CSS take over.
+const themeButtons = document.querySelectorAll(".theme-toggle__btn");
 
-const getEffectiveTheme = () => {
+const getThemeSetting = () => {
   const stored = document.documentElement.getAttribute("data-theme");
-  if (stored) return stored;
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return stored === "light" || stored === "dark" ? stored : "system";
 };
 
-const updateToggleLabel = () => {
-  const current = getEffectiveTheme();
-  themeToggle.setAttribute("aria-label", window.i18n.t(current === "light" ? "theme-to-dark" : "theme-to-light"));
+const updateThemeButtons = () => {
+  const current = getThemeSetting();
+  themeButtons.forEach((btn) => {
+    const active = btn.dataset.themeValue === current;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-pressed", String(active));
+  });
 };
 
-updateToggleLabel();
-document.addEventListener("langchange", updateToggleLabel);
+updateThemeButtons();
 
-themeToggle.addEventListener("click", () => {
-  const next = getEffectiveTheme() === "light" ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("theme", next);
-  updateToggleLabel();
+themeButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const next = btn.dataset.themeValue;
+    if (next === "system") {
+      document.documentElement.removeAttribute("data-theme");
+      localStorage.removeItem("theme");
+    } else {
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    }
+    updateThemeButtons();
+  });
 });
 
 // Project card spotlight hover effect

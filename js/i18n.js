@@ -115,10 +115,9 @@ const translations = {
 
     "footer-cta": "Let's get to work.",
 
-    "theme-to-dark": "Switch to dark theme",
-    "theme-to-light": "Switch to light theme",
-    "lang-to-es": "Switch to Spanish",
-    "lang-to-en": "Switch to English",
+    "theme-light": "Light theme",
+    "theme-dark": "Dark theme",
+    "theme-system": "System theme",
     "copied": "Copied!",
   },
 
@@ -236,10 +235,9 @@ const translations = {
 
     "footer-cta": "Manos a la obra.",
 
-    "theme-to-dark": "Cambiar a tema oscuro",
-    "theme-to-light": "Cambiar a tema claro",
-    "lang-to-es": "Cambiar a español",
-    "lang-to-en": "Cambiar a inglés",
+    "theme-light": "Tema claro",
+    "theme-dark": "Tema oscuro",
+    "theme-system": "Tema del sistema",
     "copied": "¡Copiado!",
   },
 };
@@ -283,11 +281,11 @@ const applyTranslations = () => {
     span.textContent = t("tl-hide-details");
   });
 
-  const langToggle = document.getElementById("lang-toggle");
-  if (langToggle) {
-    langToggle.textContent = currentLang === "es" ? "EN" : "ES";
-    langToggle.setAttribute("aria-label", currentLang === "es" ? t("lang-to-en") : t("lang-to-es"));
-  }
+  document.querySelectorAll(".lang-toggle__btn").forEach((btn) => {
+    const active = btn.dataset.lang === currentLang;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-pressed", String(active));
+  });
 
   document.dispatchEvent(new CustomEvent("langchange", { detail: { lang: currentLang } }));
 };
@@ -301,12 +299,9 @@ const setLang = (lang) => {
 document.addEventListener("DOMContentLoaded", () => {
   applyTranslations();
 
-  const langToggle = document.getElementById("lang-toggle");
-  if (langToggle) {
-    langToggle.addEventListener("click", () => {
-      setLang(currentLang === "es" ? "en" : "es");
-    });
-  }
+  document.querySelectorAll(".lang-toggle__btn").forEach((btn) => {
+    btn.addEventListener("click", () => setLang(btn.dataset.lang));
+  });
 });
 
 window.i18n = { t, getLang: () => currentLang, setLang };
