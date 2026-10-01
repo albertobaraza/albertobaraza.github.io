@@ -47,6 +47,13 @@ const translations = {
     "proj-more-desc-live": "Browse the rest of my repositories and contributions.",
     "proj-no-description": "No description provided.",
 
+    "apps-title": "Apps",
+    "apps-what-the-bill-desc": "Your bills, charted. A dashboard that turns PDF invoices into cost and consumption trends, entirely in your browser: nothing is uploaded.",
+    "apps-build-your-story-desc": "Build and export a polished CV in minutes: start from scratch, import from LinkedIn, or use your own AI assistant. Free, no sign-up.",
+    "apps-whack-a-mole-desc": "A browser whack-a-mole game with a live turn queue, spectating, and a global leaderboard.",
+    "apps-bling-bling-desc": "Personal finance dashboard with pluggable data sources (Google Sheets or CSV), multi-currency conversion to EUR, and interactive charts.",
+    "apps-flashback-desc": "Photo culling tool that enriches your photos with accurate dates and locations, then helps you keep only the ones that truly matter.",
+
     "experience-title": "Experience",
     "tl-present": "Present",
     "tl-show-details": "Show details",
@@ -166,6 +173,13 @@ const translations = {
     "proj-more-desc": "Mira mis repositorios y contribuciones en GitHub.",
     "proj-more-desc-live": "Explora el resto de mis repositorios y contribuciones.",
     "proj-no-description": "Sin descripción.",
+
+    "apps-title": "Apps",
+    "apps-what-the-bill-desc": "Tus facturas, en gráficas. Un panel que convierte facturas en PDF en tendencias de coste y consumo, todo en tu navegador: no se sube nada.",
+    "apps-build-your-story-desc": "Crea y exporta un CV cuidado en minutos: desde cero, importando de LinkedIn o con tu propio asistente de IA. Gratis y sin registro.",
+    "apps-whack-a-mole-desc": "Un juego de machacatopos en el navegador con cola de turnos en directo, modo espectador y clasificación global.",
+    "apps-bling-bling-desc": "Panel de finanzas personales con fuentes de datos intercambiables (Google Sheets o CSV), conversión multidivisa a EUR y gráficos interactivos.",
+    "apps-flashback-desc": "Herramienta para depurar fotos: enriquece tus fotos con fechas y ubicaciones precisas y te ayuda a quedarte solo con las que de verdad importan.",
 
     "experience-title": "Experiencia",
     "tl-present": "Actualidad",
