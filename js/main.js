@@ -282,7 +282,7 @@ const addSpotlight = (card) => {
 document.querySelectorAll(".project-card").forEach(addSpotlight);
 
 // Live GitHub project cards (falls back to the static cards above on failure)
-const projectsContainer = document.querySelector(".projects");
+const projectsContainer = document.querySelector("#projects .projects");
 const EXCLUDED_REPOS = new Set(["albertobaraza", "albertobaraza.github.io"]);
 
 // Returns [name, bytes] pairs sorted by share of the repo, largest first.
@@ -359,17 +359,7 @@ const buildThumb = (repo, languages) => {
   return thumb;
 };
 
-const buildMetaRow = (repo) => {
-  const items = [];
-  if (repo.pushed_at) {
-    const updated = new Date(repo.pushed_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-    items.push(["icon-calendar", `Last commit: ${updated}`]);
-  }
-  const license = repo.license?.spdx_id;
-  if (license && license !== "NOASSERTION") items.push(["icon-license", license]);
-
-  if (!items.length) return null;
-
+const buildMetaList = (items) => {
   const meta = document.createElement("ul");
   meta.className = "project-card__meta";
   items.forEach(([iconId, label]) => {
@@ -379,6 +369,18 @@ const buildMetaRow = (repo) => {
     meta.appendChild(li);
   });
   return meta;
+};
+
+const buildMetaRow = (repo) => {
+  const items = [];
+  if (repo.pushed_at) {
+    const updated = new Date(repo.pushed_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    items.push(["icon-calendar", `Last commit: ${updated}`]);
+  }
+  const license = repo.license?.spdx_id;
+  if (license && license !== "NOASSERTION") items.push(["icon-license", license]);
+
+  return items.length ? buildMetaList(items) : null;
 };
 
 // Donut chart of per-language byte share, using the same GitHub linguist
@@ -469,3 +471,15 @@ if (projectsContainer) {
       // Network error, rate limit, or no JS: the pinned "More on GitHub" card stays as-is
     });
 }
+
+// Deployed version on each app card, from the app's own /version.json (open CORS).
+// An app that isn't live yet, or can't be reached, just gets no version line.
+document.querySelectorAll("[data-version-url]").forEach((card) => {
+  fetch(card.dataset.versionUrl)
+    .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+    .then(({ version }) => {
+      if (typeof version !== "string" || !/^\d+\.\d+\.\d+[\w.+-]*$/.test(version)) return;
+      card.querySelector(".project-card__body").appendChild(buildMetaList([["icon-tag", `v${version}`]]));
+    })
+    .catch(() => {});
+});
