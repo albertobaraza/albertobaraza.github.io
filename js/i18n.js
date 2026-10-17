@@ -53,6 +53,7 @@ const translations = {
     "apps-whack-a-mole-desc": "A browser whack-a-mole game with a live turn queue, spectating, and a global leaderboard.",
     "apps-bling-bling-desc": "Personal finance dashboard with pluggable data sources (Google Sheets or CSV), multi-currency conversion to EUR, and interactive charts.",
     "apps-flashback-desc": "Photo culling tool that enriches your photos with accurate dates and locations, then helps you keep only the ones that truly matter.",
+    "apps-goblin-street-desc": "A trading-terminal view of the commodities auction house: prices, candles, order books and movers.",
 
     "experience-title": "Experience",
     "tl-present": "Present",
@@ -180,6 +181,7 @@ const translations = {
     "apps-whack-a-mole-desc": "Un juego de machacatopos en el navegador con cola de turnos en directo, modo espectador y clasificación global.",
     "apps-bling-bling-desc": "Panel de finanzas personales con fuentes de datos intercambiables (Google Sheets o CSV), conversión multidivisa a EUR y gráficos interactivos.",
     "apps-flashback-desc": "Herramienta para depurar fotos: enriquece tus fotos con fechas y ubicaciones precisas y te ayuda a quedarte solo con las que de verdad importan.",
+    "apps-goblin-street-desc": "Una vista de terminal de trading de la casa de subastas de materias primas: precios, velas, libros de órdenes y mayores movimientos.",
 
     "experience-title": "Experiencia",
     "tl-present": "Actualidad",
