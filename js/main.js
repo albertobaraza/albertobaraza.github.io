@@ -472,14 +472,38 @@ if (projectsContainer) {
     });
 }
 
-// Deployed version on each app card, from the app's own /version.json (open CORS).
-// An app that isn't live yet, or can't be reached, just gets no version line.
-document.querySelectorAll("[data-version-url]").forEach((card) => {
+// Deployed version and release date on each app card, from the app's own /version.json
+// (open CORS). An app that isn't live yet, or can't be reached, just gets no meta line.
+// Cards are then sorted by releaseDate (YYYY-MM-DD), oldest first; undated cards go last.
+const SORT_APPS_NEWEST_FIRST = false;
+const appCards = [...document.querySelectorAll("[data-version-url]")];
+
+const loadAppMeta = (card) =>
   fetch(card.dataset.versionUrl)
     .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-    .then(({ version }) => {
-      if (typeof version !== "string" || !/^\d+\.\d+\.\d+[\w.+-]*$/.test(version)) return;
-      card.querySelector(".project-card__body").appendChild(buildMetaList([["icon-tag", `v${version}`]]));
+    .then(({ version, releaseDate }) => {
+      const items = [];
+      if (typeof version === "string" && /^\d+\.\d+\.\d+[\w.+-]*$/.test(version)) {
+        items.push(["icon-tag", `v${version}`]);
+      }
+      if (typeof releaseDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) {
+        card.dataset.releaseDate = releaseDate;
+        const shown = new Date(releaseDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+        items.push(["icon-calendar", `Released: ${shown}`]);
+      }
+      if (items.length) card.querySelector(".project-card__body").appendChild(buildMetaList(items));
     })
     .catch(() => {});
+
+Promise.all(appCards.map(loadAppMeta)).then(() => {
+  const dir = SORT_APPS_NEWEST_FIRST ? -1 : 1;
+  const sorted = [...appCards].sort((a, b) => {
+    const da = a.dataset.releaseDate, db = b.dataset.releaseDate;
+    if (!da || !db) return !da - !db; // undated last
+    return da < db ? -dir : da > db ? dir : 0; // stable: ties keep page order
+  });
+  sorted.forEach((card, i) => {
+    card.style.setProperty("--i", i + 1);
+    card.parentElement.appendChild(card);
+  });
 });
