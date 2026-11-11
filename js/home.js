@@ -283,8 +283,32 @@ const LANGUAGE_COLORS = {
   Swift: "#F05138",
   Kotlin: "#A97BFF",
   Vue: "#41b883",
+  R: "#198CE7",
+  MATLAB: "#e16737",
+  "C#": "#178600",
+  Dart: "#00B4AB",
+  Lua: "#3a3a9e",
+  Makefile: "#427819",
+  Svelte: "#ff3e00",
+  Nix: "#7e7eff",
+  TeX: "#3D6117",
+  PowerShell: "#2d5a87",
+  Astro: "#ff5a03",
+  MDX: "#fcb32c",
+  XSLT: "#EB8CEB",
 };
 const DEFAULT_THUMB_COLOR = "#fbbf24";
+
+// The language chart is a legend, so two slices must never share a color. A language without a
+// linguist color above gets a stable pick from this palette (same name, same color every time)
+// and the "Other" bucket is always neutral grey.
+const FALLBACK_LANGUAGE_COLORS = ["#14b8a6", "#d946ef", "#fb7185", "#38bdf8", "#a3e635", "#f59e0b"];
+const OTHER_LANGUAGE_COLOR = "#8b949e";
+const languageColor = (name) => {
+  if (LANGUAGE_COLORS[name]) return LANGUAGE_COLORS[name];
+  const hash = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return FALLBACK_LANGUAGE_COLORS[hash % FALLBACK_LANGUAGE_COLORS.length];
+};
 
 const getInitials = (name) => {
   const words = name.split(/[-_\s]+/).filter(Boolean);
@@ -322,44 +346,135 @@ const buildThumb = (repo, color) => {
   return thumb;
 };
 
-// The ring around a repo's icon is its language mix: a thin segmented ring using the same
-// GitHub linguist colors as the tile. Long tails beyond MAX_RING_SLICES collapse into "Other".
+// A repo's language mix, shared by the ring and the hover chart so they always agree. Takes
+// [name, size] pairs, largest first (GitHub's byte counts today; any source that can give
+// relative sizes works) and returns slices with their share of the total. Long tails beyond
+// MAX_RING_SLICES collapse into a single "Other" slice.
 const MAX_RING_SLICES = 5;
-const buildOrbit = (languages) => {
+const summarizeLanguages = (languages) => {
+  const total = languages.reduce((sum, [, size]) => sum + size, 0);
+  if (!total) return [];
+
+  const top = languages.slice(0, MAX_RING_SLICES).map(([name, size]) => ({
+    name,
+    share: size / total,
+    color: languageColor(name),
+    isOther: false,
+  }));
+  const otherSize = languages.slice(MAX_RING_SLICES).reduce((sum, [, size]) => sum + size, 0);
+  if (otherSize > 0) {
+    top.push({ name: "Other", share: otherSize / total, color: OTHER_LANGUAGE_COLOR, isOther: true });
+  }
+  return top;
+};
+
+// The ring around a repo's icon is its language mix: a thin segmented ring using the same
+// colors as the tile and the hover chart (buildLanguageChart).
+const buildOrbit = (slices) => {
   const orbit = document.createElement("span");
   orbit.className = "station__orbit";
-
-  const total = languages.reduce((sum, [, bytes]) => sum + bytes, 0);
-  if (!total) return orbit; // no language data: keep the plain dashed orbit
-
-  const top = languages.slice(0, MAX_RING_SLICES);
-  const otherBytes = languages.slice(MAX_RING_SLICES).reduce((sum, [, bytes]) => sum + bytes, 0);
-  const slices = otherBytes > 0 ? [...top, ["Other", otherBytes]] : top;
+  if (!slices.length) return orbit; // no language data: keep the plain dashed orbit
 
   let cursor = 0;
-  const stops = slices.map(([name, bytes]) => {
-    const start = (cursor / total) * 100;
-    cursor += bytes;
-    const end = (cursor / total) * 100;
-    const color = LANGUAGE_COLORS[name] || DEFAULT_THUMB_COLOR;
-    return `${color} ${start.toFixed(2)}% ${end.toFixed(2)}%`;
+  const stops = slices.map(({ share, color }) => {
+    const start = cursor * 100;
+    cursor += share;
+    return `${color} ${start.toFixed(2)}% ${(cursor * 100).toFixed(2)}%`;
   });
 
   orbit.classList.add("station__orbit--langs");
   orbit.style.background = `conic-gradient(${stops.join(", ")})`;
-  orbit.title = slices.map(([name, bytes]) => `${name} ${((bytes / total) * 100).toFixed(1)}%`).join(" · ");
   return orbit;
 };
+
+const formatShare = (share) => (share * 100 < 0.1 ? "<0.1%" : `${(share * 100).toFixed(1)}%`);
+
+// The card that opens beside the icon on hover/focus (the CSS owns when). It spells out what the
+// ring only hints at: which languages, and how much of each. It's decorative duplicate info for
+// pointer users, so it's hidden from assistive tech and offered to it as the link's description.
+const buildLanguageChart = (slices, id) => {
+  const chart = document.createElement("div");
+  chart.className = "station__langs";
+  chart.id = id;
+  chart.setAttribute("aria-hidden", "true");
+
+  const title = document.createElement("p");
+  title.className = "station__langs-title";
+  title.dataset.i18n = "proj-languages";
+  title.textContent = window.i18n.t("proj-languages");
+
+  const list = document.createElement("ul");
+  list.className = "station__langs-list";
+  slices.forEach(({ name, share, color, isOther }, i) => {
+    const row = document.createElement("li");
+    row.style.setProperty("--c", color);
+    row.style.setProperty("--p", (share * 100).toFixed(2));
+    row.style.setProperty("--n", String(i));
+
+    const dot = document.createElement("i");
+    const label = document.createElement("span");
+    if (isOther) {
+      label.dataset.i18n = "proj-lang-other";
+      label.textContent = window.i18n.t("proj-lang-other");
+    } else {
+      label.textContent = name;
+    }
+    const pct = document.createElement("b");
+    pct.textContent = formatShare(share);
+
+    row.append(dot, label, pct);
+    list.appendChild(row);
+  });
+
+  chart.append(title, list);
+  return chart;
+};
+
+// Where each language chart opens. Preferably on the side of the icon that has no text, so the
+// chart only adds to the card and nothing has to be hidden. When there isn't room out there (a
+// narrower window, or on phones where the icon hugs the edge) it opens across the text instead and
+// the CSS fades that text back. A station's icon position only depends on the viewport width, so
+// this runs once the stations exist and on resize, not on hover (which would make it jump).
+const CHART_WIDTH = { max: 216, min: 170 }; // narrower than min would truncate names like "JavaScript"
+const CHART_EDGE_MARGIN = 12; // keep this much air between the chart and the window edge
+const placeLanguageCharts = () => {
+  const viewport = document.documentElement.clientWidth;
+  document.querySelectorAll(".station--langs").forEach((station) => {
+    const iconEl = station.querySelector(".station__icon");
+    const icon = iconEl.getBoundingClientRect();
+    const iconIsLeft = icon.left < station.querySelector(".station__body").getBoundingClientRect().left;
+
+    // Room beyond the icon, minus what the chart itself spends: the ring around the icon and its gap
+    const roomOutside = iconIsLeft ? icon.left : viewport - icon.right;
+    const spent = iconEl.offsetWidth * 0.14 + 0.55 * 16 + CHART_EDGE_MARGIN;
+    const width = Math.min(CHART_WIDTH.max, roomOutside - spent);
+    const fitsOutside = width >= CHART_WIDTH.min;
+
+    // Outside: the side opposite the text. Across the text: the side the text is on.
+    station.dataset.chartSide = iconIsLeft === fitsOutside ? "left" : "right";
+    station.toggleAttribute("data-chart-over", !fitsOutside);
+    if (fitsOutside) station.style.setProperty("--langs-w", `${Math.floor(width)}px`);
+    else station.style.removeProperty("--langs-w");
+  });
+};
+
+let placeFrame = 0;
+window.addEventListener("resize", () => {
+  cancelAnimationFrame(placeFrame);
+  placeFrame = requestAnimationFrame(placeLanguageCharts);
+});
 
 const buildRepoStation = (repo, languages) => {
   // A link can't nest inside another, so a station with extra links is a div whose title link
   // is stretched over the whole station (see .station--multi).
   const extraLinks = EXTRA_LINKS[repo.name] || [];
   const hasExtra = extraLinks.length > 0;
-  const color = LANGUAGE_COLORS[languages[0]?.[0]] || DEFAULT_THUMB_COLOR;
+  const slices = summarizeLanguages(languages);
+  const color = slices[0]?.color || DEFAULT_THUMB_COLOR;
 
   const station = document.createElement(hasExtra ? "div" : "a");
-  station.className = "station station--project" + (hasExtra ? " station--multi" : "");
+  station.className =
+    "station station--project" + (hasExtra ? " station--multi" : "") + (slices.length ? " station--langs" : "");
   station.style.setProperty("--node-color", color);
   station.style.setProperty("--i", "1");
 
@@ -369,9 +484,19 @@ const buildRepoStation = (repo, languages) => {
   repoLink.rel = "noopener";
   if (hasExtra) repoLink.className = "station__stretch";
 
-  const icon = document.createElement("span");
+  // In a multi-link station the stretched title link covers everything, which would swallow the
+  // hover that opens the language chart. The icon therefore sits above it as a link of its own
+  // (same repo; hidden from assistive tech and the tab order, since the title link already is it).
+  const icon = document.createElement(hasExtra ? "a" : "span");
   icon.className = "station__icon";
-  icon.append(buildOrbit(languages), buildThumb(repo, color));
+  if (hasExtra) {
+    icon.href = repo.html_url;
+    icon.target = "_blank";
+    icon.rel = "noopener";
+    icon.tabIndex = -1;
+    icon.setAttribute("aria-hidden", "true");
+  }
+  icon.append(buildOrbit(slices), buildThumb(repo, color));
 
   const license = repo.license?.spdx_id;
   if (license && license !== "NOASSERTION") {
@@ -416,6 +541,11 @@ const buildRepoStation = (repo, languages) => {
   }
 
   station.append(icon, body);
+  if (slices.length) {
+    const chartId = `lang-chart-${repo.id}`;
+    station.appendChild(buildLanguageChart(slices, chartId));
+    repoLink.setAttribute("aria-describedby", chartId);
+  }
   observeReveal(body);
   return station;
 };
@@ -443,6 +573,7 @@ if (journeyMap && moreStation) {
         top.forEach((repo, i) => journeyMap.insertBefore(buildRepoStation(repo, stats[i]), moreStation));
 
         renderDates();
+        placeLanguageCharts();
         flow.rebuild();
       });
     })

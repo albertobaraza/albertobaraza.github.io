@@ -396,6 +396,7 @@
   opacity: 0;
   transition: opacity 0.5s ease;
   animation: orbitSpin 26s linear infinite;
+  animation-play-state: var(--orbit-state, running);
   pointer-events: none;
 }
 
@@ -424,6 +425,184 @@
 
 .station__orbit--langs::after {
   display: none;
+}
+
+/* Language chart: a card that opens from the icon toward the text and spells out the ring. The
+   station sets --peek (0 closed, 1 open) and everything below derives from it, so the card, its
+   bars and the faded text can't drift apart. Only repo stations with language data have one. */
+.station--langs {
+  --peek: 0;
+}
+
+/* Keyboard focus opens it everywhere; hover only on real pointers, so a tap on a phone doesn't
+   leave a sticky card behind. The multi-link station's icon is its own link above the stretched one. */
+.station--langs:is(:focus-visible, :has(.station__stretch:focus-visible)) {
+  --peek: 1;
+  --orbit-state: paused;
+}
+
+@media (hover: hover) {
+  .station--langs:has(.station__icon:hover) {
+    --peek: 1;
+    --orbit-state: paused;
+  }
+}
+
+/* Lift an open station above its neighbours so the card never slides under their text */
+.station--langs:is(:hover, :focus-within) {
+  z-index: calc(var(--peek) * 4);
+}
+
+.station--multi .station__icon {
+  z-index: 2;
+  text-decoration: none; /* it's a link here, and shouldn't underline the initials */
+}
+
+.station__langs {
+  /* Distance from the station's edge to the chart's near edge. --out opens on the side with no
+     text (past the icon and its ring); --over opens across the text, from just beside the icon.
+     home.js picks which, and which side, from the room the window has (placeLanguageCharts). */
+  --out: calc(100% + var(--icon) * 0.14 + 0.55rem);
+  --over: calc(var(--icon) * 1.14 + 0.55rem);
+  --slide: -12px;
+  position: absolute;
+  top: 50%;
+  left: var(--over);
+  z-index: 3;
+  width: var(--langs-w, clamp(10.5rem, 52vw, 13.5rem));
+  padding: 0.65rem 0.7rem 0.7rem;
+  border-radius: 18px 7px 18px 7px;
+  border: 1px solid color-mix(in srgb, var(--node-color) 50%, var(--border));
+  background: color-mix(in srgb, var(--node-color) 7%, var(--bg-elevated));
+  box-shadow:
+    0 2px 8px rgb(0 0 0 / 0.18),
+    0 22px 44px -20px color-mix(in srgb, var(--node-color) 60%, transparent);
+  opacity: var(--peek);
+  translate: calc((1 - var(--peek)) * var(--slide)) -50%;
+  scale: calc(0.94 + var(--peek) * 0.06);
+  transform-origin: left center;
+  transition:
+    opacity 0.2s ease,
+    translate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none; /* never traps the pointer: clicks fall through to the station's link */
+}
+
+/* Little tail pointing back at the icon */
+.station__langs::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  rotate: 45deg;
+  border-left: 1px solid color-mix(in srgb, var(--node-color) 50%, var(--border));
+  border-bottom: 1px solid color-mix(in srgb, var(--node-color) 50%, var(--border));
+  background: color-mix(in srgb, var(--node-color) 7%, var(--bg-elevated));
+}
+
+.station__langs-title {
+  margin: 0 0 0.3rem 0.1rem;
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--node-color) 70%, var(--text));
+  rotate: -2deg;
+  transform-origin: left center;
+}
+
+.station__langs-list {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.station__langs-list li {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* The bar: this language's share of the repo, growing in from the left, one row after another */
+.station__langs-list li::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: -1;
+  width: calc(var(--p) * 1%);
+  min-width: 5px;
+  border-radius: inherit;
+  /* a faint neutral base keeps very dark language colors (Dockerfile) visible on a dark card */
+  background: color-mix(in srgb, var(--c) 34%, color-mix(in srgb, var(--text) 10%, transparent));
+  transform-origin: left center;
+  scale: var(--peek) 1;
+  transition: scale 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--n) * 55ms + 90ms);
+}
+
+.station__langs-list i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 28%, transparent); /* hairline so dark dots read on dark */
+}
+
+.station__langs-list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.station__langs-list b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* Which side of the station the chart sits on (the default above is the right). Beyond the icon,
+   it lies outside the station and the text stays untouched. */
+.station--langs[data-chart-side="right"]:not([data-chart-over]) .station__langs {
+  left: var(--out);
+}
+
+.station--langs[data-chart-side="left"] .station__langs {
+  left: auto;
+  right: var(--over);
+  transform-origin: right center;
+  --slide: 12px;
+}
+
+.station--langs[data-chart-side="left"]:not([data-chart-over]) .station__langs {
+  right: var(--out);
+}
+
+.station--langs[data-chart-side="left"] .station__langs::before {
+  left: auto;
+  right: -6px;
+  border-left: 0;
+  border-bottom: 0;
+  border-right: 1px solid color-mix(in srgb, var(--node-color) 50%, var(--border));
+  border-top: 1px solid color-mix(in srgb, var(--node-color) 50%, var(--border));
+}
+
+/* Only when there was no room beside the icon does the chart open across the text, and then the
+   text steps back so a half-covered line never competes with it */
+.station--langs[data-chart-over] .station__body > * {
+  opacity: calc(1 - var(--peek) * 0.8);
+  transition: opacity 0.25s ease;
 }
 
 .station.is-lit .station__icon {
@@ -639,6 +818,9 @@
   .station__icon > img,
   .station__thumb,
   .station__icon::before,
+  .station__langs,
+  .station__langs-list li::before,
+  .station--langs[data-chart-over] .station__body > *,
   .btn {
     transition: none;
   }
