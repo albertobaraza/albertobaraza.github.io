@@ -17,7 +17,6 @@ const translations = {
     "hero-lede": `
         Well-defined workflows and a clear objective. The foundation of a great project.
       `,
-    "hero-email-btn": "Email",
 
     "about-title": "About",
     "about-text": `
@@ -125,7 +124,6 @@ const translations = {
     "theme-light": "Light theme",
     "theme-dark": "Dark theme",
     "theme-system": "System theme",
-    "copied": "Copied!",
   },
 
   es: {
@@ -143,7 +141,6 @@ const translations = {
     "hero-lede": `
         Flujos de trabajo bien definidos y un objetivo claro. La base de un gran proyecto.
       `,
-    "hero-email-btn": "Correo",
 
     "about-title": "Sobre mí",
     "about-text": `
@@ -252,7 +249,6 @@ const translations = {
     "theme-light": "Tema claro",
     "theme-dark": "Tema oscuro",
     "theme-system": "Tema del sistema",
-    "copied": "¡Copiado!",
   },
 };
 
@@ -279,10 +275,6 @@ const applyTranslations = () => {
 
   document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
     el.setAttribute("aria-label", t(el.dataset.i18nAria));
-  });
-
-  document.querySelectorAll("[data-i18n-default-label]").forEach((el) => {
-    el.setAttribute("data-default-label", t(el.dataset.i18nDefaultLabel));
   });
 
   const metaDescription = document.getElementById("meta-description");

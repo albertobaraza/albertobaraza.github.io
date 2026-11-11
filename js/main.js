@@ -214,26 +214,6 @@ stackChips.forEach((chip) => {
   });
 });
 
-// Copy-to-clipboard email buttons
-if (navigator.clipboard) {
-  document.querySelectorAll(".copy-email").forEach((el) => {
-    el.addEventListener("click", (e) => {
-      e.preventDefault();
-      const email = el.href.replace(/^mailto:/, "");
-      navigator.clipboard.writeText(email).then(() => {
-        const label = el.dataset.defaultLabel;
-        el.textContent = window.i18n.t("copied");
-        el.classList.add("is-copied");
-        clearTimeout(el._copyTimeout);
-        el._copyTimeout = setTimeout(() => {
-          el.textContent = label;
-          el.classList.remove("is-copied");
-        }, 1600);
-      });
-    });
-  });
-}
-
 // Manual dark/light/system theme toggle. "system" means no explicit
 // override: no data-theme attribute, no localStorage entry, and the
 // prefers-color-scheme media queries in the CSS take over.
