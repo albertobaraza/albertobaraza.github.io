@@ -54,12 +54,15 @@ updateThemeButtons();
 themeButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     const next = btn.dataset.themeValue;
-    if (next === "system") {
-      document.documentElement.removeAttribute("data-theme");
-      localStorage.removeItem("theme");
-    } else {
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("theme", next);
+    if (next === "system") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", next);
+
+    // Applied first, so the toggle still works when storage is blocked (it just isn't remembered)
+    try {
+      if (next === "system") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", next);
+    } catch {
+      // storage blocked
     }
     updateThemeButtons();
   });

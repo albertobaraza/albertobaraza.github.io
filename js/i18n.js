@@ -257,7 +257,12 @@ const translations = {
 };
 
 const getStoredLang = () => {
-  const stored = localStorage.getItem("lang");
+  let stored = null;
+  try {
+    stored = localStorage.getItem("lang");
+  } catch {
+    // storage blocked: fall back to the browser's language
+  }
   return stored === "en" || stored === "es" ? stored : null;
 };
 
@@ -303,7 +308,11 @@ const applyTranslations = () => {
 
 const setLang = (lang) => {
   currentLang = lang === "es" ? "es" : "en";
-  localStorage.setItem("lang", currentLang);
+  try {
+    localStorage.setItem("lang", currentLang);
+  } catch {
+    // storage blocked: the choice applies for this visit but won't be remembered
+  }
   applyTranslations();
 };
 

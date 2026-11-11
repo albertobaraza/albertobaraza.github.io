@@ -18,12 +18,18 @@
   </style></noscript>
   <script>
     (function () {
-      var stored = localStorage.getItem("theme");
+      // Storage can be blocked (strict privacy settings make it throw): then use the defaults
+      var stored = null;
+      var lang = null;
+      try {
+        stored = localStorage.getItem("theme");
+        lang = localStorage.getItem("lang");
+      } catch (e) {}
+
       if (stored === "light" || stored === "dark") {
         document.documentElement.setAttribute("data-theme", stored);
       }
 
-      var lang = localStorage.getItem("lang");
       if (lang !== "en" && lang !== "es") {
         var nav = (navigator.language || (navigator.languages && navigator.languages[0]) || "en").toLowerCase();
         lang = nav.indexOf("es") === 0 ? "es" : "en";
