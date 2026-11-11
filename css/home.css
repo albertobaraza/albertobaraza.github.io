@@ -434,15 +434,19 @@
   --peek: 0;
 }
 
-/* Keyboard focus opens it everywhere; hover only on real pointers, so a tap on a phone doesn't
-   leave a sticky card behind. The multi-link station's icon is its own link above the stretched one. */
+/* Keyboard focus opens it everywhere. Hover only on real pointers, so a tap on a phone doesn't
+   leave a sticky card behind. When the chart opens beside the card, hovering anywhere on the card
+   (icon or text) opens it. When there was no room and it opens across the text, only the icon
+   does: otherwise hovering the text to read it would cover what you're reading. (The multi-link
+   station's icon is its own link above the stretched one, so it can still be hovered on its own.) */
 .station--langs:is(:focus-visible, :has(.station__stretch:focus-visible)) {
   --peek: 1;
   --orbit-state: paused;
 }
 
 @media (hover: hover) {
-  .station--langs:has(.station__icon:hover) {
+  .station--langs:not([data-chart-over]):hover,
+  .station--langs[data-chart-over]:has(.station__icon:hover) {
     --peek: 1;
     --orbit-state: paused;
   }
