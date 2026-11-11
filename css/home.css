@@ -200,12 +200,6 @@
   white-space: nowrap;
 }
 
-.hero__hello-arrow {
-  width: clamp(54px, 8vw, 80px);
-  height: auto;
-  margin-bottom: -1.2rem;
-}
-
 .hero__links {
   display: flex;
   flex-wrap: wrap;

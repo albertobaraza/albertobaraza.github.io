@@ -33,7 +33,6 @@
         document.documentElement.setAttribute("data-theme", stored);
       }
 
-      var lang = localStorage.getItem("lang");
       if (lang !== "en" && lang !== "es") {
         var nav = (navigator.language || (navigator.languages && navigator.languages[0]) || "en").toLowerCase();
         lang = nav.indexOf("es") === 0 ? "es" : "en";
@@ -96,9 +95,6 @@
 
       <div class="hero__hello reveal" style="--i:0">
         <p class="hero__note" data-i18n="hero-hi">Hello there!</p>
-        <svg class="hero__hello-arrow" viewBox="0 0 64 56" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M4 6C22 0 50 8 52 40"/><path d="M42 32l10 12 8-14"/>
-        </svg>
       </div>
 
       <h1 class="hero__name"><span class="hero__first reveal" style="--i:1">Alberto</span> <span class="hero__last reveal" style="--i:2">Baraza</span></h1>
