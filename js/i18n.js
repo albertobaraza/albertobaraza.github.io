@@ -5,20 +5,20 @@ const translations = {
   en: {
     "meta-title": "Alberto Baraza, Data Engineer",
     "meta-description": "Alberto Baraza, Senior Data Engineer. Clean pipelines, solid architecture, and systems that don't break.",
+    "meta-title-experience": "Alberto Baraza, Experience",
+    "meta-description-experience": "Alberto Baraza's career as a data engineer, from BI analyst to senior: roles, what I built, and the tools I use.",
 
-    "nav-about": "About",
-    "nav-projects": "Projects",
+    "nav-home": "Home",
     "nav-experience": "Experience",
-    "nav-stack": "Stack",
-    "nav-contact": "Contact",
 
     "hero-hi": "Hello there!",
     "hero-title": "Senior Data Engineer",
     "hero-lede": `
-        Well-defined workflows and a clear objective. The foundation of a great project.
+        I spend my days wrangling data for a living, and my evenings building random stuff just because it sounds fun.
       `,
 
     "about-title": "About",
+    "experience-lede": "Well-defined workflows and a clear objective. The foundation of a great project.",
     "about-text": `
         I started out studying software engineering, and step by step I've shaped myself into a data engineer.<br>
         Small Bash, SQL, Java, and Python
@@ -38,14 +38,14 @@ const translations = {
     "pl-annotation": "that's me now!",
     "pl-hint": "My career, one pipeline. Click a stage to jump to it.",
 
-    "projects-title": "Projects",
-    "proj-more-title": `More on GitHub <span class="project-card__arrow">↗</span>`,
+    "proj-more-title": `More on GitHub <span class="station__arrow">↗</span>`,
     "proj-more-desc": "View my repositories and contributions on GitHub.",
     "proj-more-desc-live": "Browse the rest of my repositories and contributions.",
     "proj-no-description": "No description provided.",
     "proj-tapeo-dev-desc": "An open notebook of guides, notes, links and projects.",
+    "label-released": "Released:",
+    "label-last-commit": "Last commit:",
 
-    "apps-title": "Apps",
     "apps-what-the-bill-desc": "Your bills, charted. A dashboard that turns PDF invoices into cost and consumption trends, entirely in your browser: nothing is uploaded.",
     "apps-build-your-story-desc": "Build and export a polished CV in minutes: start from scratch, import from LinkedIn, or use your own AI assistant. Free, no sign-up.",
     "apps-whack-a-mole-desc": "A browser whack-a-mole game with a live turn queue, spectating, and a global leaderboard.",
@@ -129,20 +129,20 @@ const translations = {
   es: {
     "meta-title": "Alberto Baraza, Ingeniero de Datos",
     "meta-description": "Alberto Baraza, Ingeniero de Datos Senior. Pipelines limpios, arquitectura sólida y sistemas que no fallan.",
+    "meta-title-experience": "Alberto Baraza, Experiencia",
+    "meta-description-experience": "La trayectoria de Alberto Baraza como ingeniero de datos, de analista BI a senior: puestos, lo que he construido y las herramientas que uso.",
 
-    "nav-about": "Sobre mí",
-    "nav-projects": "Proyectos",
+    "nav-home": "Inicio",
     "nav-experience": "Experiencia",
-    "nav-stack": "Tecnologías",
-    "nav-contact": "Contacto",
 
     "hero-hi": "¡Hola!",
     "hero-title": "Ingeniero de Datos Senior",
     "hero-lede": `
-        Flujos de trabajo bien definidos y un objetivo claro. La base de un gran proyecto.
+        Me paso los días domando datos para ganarme la vida y las noches construyendo cosas al azar solo porque suena divertido.
       `,
 
     "about-title": "Sobre mí",
+    "experience-lede": "Flujos de trabajo bien definidos y un objetivo claro. La base de un gran proyecto.",
     "about-text": `
         Empecé estudiando ingeniería del software y, paso a paso, me he ido formando como ingeniero de datos.<br>
         Los pequeños scripts de Bash,
@@ -163,14 +163,14 @@ const translations = {
     "pl-annotation": "por aquí vamos",
     "pl-hint": "Mi carrera, un solo pipeline. Haz clic en una etapa para ir a ella.",
 
-    "projects-title": "Proyectos",
-    "proj-more-title": `Más en GitHub <span class="project-card__arrow">↗</span>`,
+    "proj-more-title": `Más en GitHub <span class="station__arrow">↗</span>`,
     "proj-more-desc": "Mira mis repositorios y contribuciones en GitHub.",
     "proj-more-desc-live": "Explora el resto de mis repositorios y contribuciones.",
     "proj-no-description": "Sin descripción.",
     "proj-tapeo-dev-desc": "Un cuaderno abierto de guías, notas, enlaces y proyectos.",
+    "label-released": "Lanzamiento:",
+    "label-last-commit": "Último commit:",
 
-    "apps-title": "Apps",
     "apps-what-the-bill-desc": "Tus facturas, en gráficas. Un panel que convierte facturas en PDF en tendencias de coste y consumo, todo en tu navegador: no se sube nada.",
     "apps-build-your-story-desc": "Crea y exporta un CV cuidado en minutos: desde cero, importando de LinkedIn o con tu propio asistente de IA. Gratis y sin registro.",
     "apps-whack-a-mole-desc": "Un juego de machacatopos en el navegador con cola de turnos en directo, modo espectador y clasificación global.",
@@ -277,8 +277,9 @@ const applyTranslations = () => {
     el.setAttribute("aria-label", t(el.dataset.i18nAria));
   });
 
-  const metaDescription = document.getElementById("meta-description");
-  if (metaDescription) metaDescription.setAttribute("content", t("meta-description"));
+  document.querySelectorAll("[data-i18n-content]").forEach((el) => {
+    el.setAttribute("content", t(el.dataset.i18nContent));
+  });
 
   // Toggle buttons carry their own show/hide state - the generic data-i18n
   // pass above just reset every one of them to "show", so fix up any that

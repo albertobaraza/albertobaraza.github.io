@@ -4,10 +4,10 @@
   --border: #1e2732;
   --text: #e6edf3;
   --text-muted: #8b98a5;
-  --accent: #22d3ee;
-  --accent-dim: #0891b2;
-  --nav-bg: rgba(11, 15, 20, 0.85);
-  --btn-primary-text: #06222a;
+  --accent: #fbbf24;
+  --accent-ink: #fbbf24;
+  --accent-dim: #c8920a;
+  --btn-primary-text: #1c1400;
   --hero-glow-opacity: 1;
   --radius: 10px;
   --max-width: 780px;
@@ -43,7 +43,7 @@ body {
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-ink);
   text-decoration: none;
 }
 
@@ -51,89 +51,166 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Nav */
+/* Nav: there is no bar. Every control hangs from the top edge of the window on its own rope.
+   nav.js simulates the ropes (and moves the controls); without JS the ropes are plain CSS lines
+   and the controls just hang still. The controls are ordinary links and buttons either way. */
+
+body {
+  padding-top: 4.5rem;
+}
 
 .nav {
-  position: sticky;
+  --rope-color: color-mix(in srgb, var(--text-muted) 85%, var(--bg));
+  --tag-shadow: 0 10px 18px -12px color-mix(in srgb, #000 60%, transparent);
+  position: fixed;
   top: 0;
-  z-index: 10;
+  left: 0;
+  right: 0;
+  z-index: 20;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 1.1rem 1.5rem;
-  background: var(--nav-bg);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
+  height: 0;
+  padding: 0 1.5rem;
+  pointer-events: none; /* only the hanging controls take pointer events */
 }
 
+/* Three columns: empty | page tags (centered in the window) | toggles (right) */
 .nav__right {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+}
+
+.nav__links,
+.nav__toggles {
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.nav__brand {
-  display: flex;
-  align-items: center;
-}
-
-.nav__brand-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid transparent;
-  transition: border-color 0.2s ease;
-}
-
-.nav__brand:hover .nav__brand-avatar {
-  border-color: var(--accent);
+  align-items: flex-start;
 }
 
 .nav__links {
-  display: flex;
-  gap: 1.25rem;
+  grid-column: 2;
+  gap: 0.75rem;
 }
 
-.nav__links a {
+.nav__toggles {
+  grid-column: 3;
+  justify-self: end;
+  gap: 1rem;
+}
+
+.nav__ropes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 320px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.nav__ropes .rope {
+  fill: none;
+  stroke: var(--rope-color);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* a lighter, dashed strand on top of the rope gives it a twisted-thread look */
+.nav__ropes .rope--twist {
+  stroke: color-mix(in srgb, var(--text) 40%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 1.5 4;
+}
+
+.nav__ropes .nail {
+  fill: var(--rope-color);
+}
+
+/* A hanging control. Its top edge is where the rope attaches; --rope is how far below the top of
+   the window that is. nav.js rotates/translates it around that point. */
+.hang {
+  position: relative;
+  margin-top: var(--rope, 40px);
+  transform-origin: 50% 0;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+}
+
+/* the eyelet the rope is tied to */
+.hang::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: -5px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  border-radius: 50%;
+  border: 2px solid var(--rope-color);
+  background: var(--bg);
+  pointer-events: none;
+}
+
+/* no-JS fallback: a straight rope up to the top edge */
+.nav:not(.has-ropes) .hang::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 1.5px;
+  height: var(--rope, 40px);
+  margin-left: -0.75px;
+  background: var(--rope-color);
+  pointer-events: none;
+}
+
+.nav__links .hang:nth-child(1) { --rope: 58px; }
+.nav__links .hang:nth-child(2) { --rope: 40px; }
+.hang--lang { --rope: 66px; }
+.hang--theme { --rope: 46px; }
+
+.nav-tag {
+  display: block;
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px 12px 16px 16px;
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  box-shadow: var(--tag-shadow);
+  backdrop-filter: blur(6px);
   color: var(--text-muted);
   font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
 
-.nav__links a:hover {
+.nav-tag:hover,
+.nav-tag:focus-visible {
   color: var(--text);
+  border-color: var(--accent);
   text-decoration: none;
 }
 
-.nav.is-scrolled {
-  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.5);
-}
-
-.nav__links a {
-  position: relative;
-}
-
-.nav__links a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -4px;
-  height: 2px;
-  background: var(--accent);
-  border-radius: 2px;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.25s ease;
-}
-
-.nav__links a:hover::after,
-.nav__links a.is-active::after {
-  transform: scaleX(1);
-}
-
-.nav__links a.is-active {
+.nav-tag[aria-current="page"] {
   color: var(--text);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated));
+}
+
+.hang .theme-toggle,
+.hang .lang-toggle {
+  box-shadow: var(--tag-shadow);
+}
+
+/* While a control is being dragged with the mouse */
+.is-dragging-hang,
+.is-dragging-hang * {
+  cursor: grabbing !important;
 }
 
 /* Segmented controls (theme, language): a shared pill-shaped outer border
@@ -213,128 +290,16 @@ main {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--accent);
+  color: var(--accent-ink);
   margin: 0 0 1.75rem;
   font-family: var(--font-mono);
-}
-
-/* Hero */
-
-.hero {
-  position: relative;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 5rem 1.5rem 3rem;
-  overflow: hidden;
-}
-
-.hero__glow {
-  position: absolute;
-  inset: -25% -15%;
-  background:
-    radial-gradient(circle at 28% 28%, rgba(34, 211, 238, 0.18), transparent 60%),
-    radial-gradient(circle at 72% 65%, rgba(8, 145, 178, 0.14), transparent 55%);
-  filter: blur(50px);
-  opacity: var(--hero-glow-opacity);
-  animation: heroGlowDrift 16s ease-in-out infinite alternate;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.hero > *:not(.hero__glow) {
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes heroGlowDrift {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(4%, -4%) scale(1.1);
-  }
-}
-
-.hero__name-row {
-  position: relative;
-  display: inline-block;
-}
-
-.hero__note {
-  position: absolute;
-  top: -0.6rem;
-  left: 100%;
-  margin: 0 0 0 clamp(0rem, -0.5rem + 3.5vw, 1rem);
-  font-family: var(--font-hand);
-  font-size: clamp(0.9rem, 3vw, 1.5rem);
-  color: var(--accent);
-  transform: rotate(-20deg);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.hero__name {
-  font-size: clamp(2.25rem, 6vw, 3.25rem);
-  margin: 0;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.hero__title {
-  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-  color: var(--text-muted);
-  margin: 0.5rem 0 1.5rem;
-}
-
-.hero__lede {
-  max-width: 60ch;
-  color: var(--text-muted);
-  font-size: 1.05rem;
-}
-
-.hero__links {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 2rem;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.6rem 1.1rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--text-muted);
-  background: var(--bg-elevated);
-  color: var(--text);
-  font-size: 0.9rem;
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
-}
-
-.btn:hover {
-  border-color: var(--accent);
-  background: var(--border);
-  text-decoration: none;
-  transform: translateY(-1px);
-}
-
-.btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--btn-primary-text);
-  font-weight: 600;
-}
-
-.btn--primary:hover {
-  background: var(--accent-dim);
-  border-color: var(--accent-dim);
 }
 
 /* About */
 
 .about__text {
-  max-width: 65ch;
   color: var(--text-muted);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 
 .pipeline-bleed {
@@ -404,7 +369,7 @@ main {
   margin-top: -4px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 6px 2px var(--accent), 0 0 16px 4px rgba(34, 211, 238, 0.45);
+  box-shadow: 0 0 6px 2px var(--accent), 0 0 16px 4px color-mix(in srgb, var(--accent) 45%, transparent);
   animation: pipelineBeam 5s linear infinite;
   pointer-events: none;
 }
@@ -533,7 +498,7 @@ main {
 
 .timeline__stack mark {
   background: none;
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 700;
 }
 
@@ -547,7 +512,7 @@ main {
     box-shadow: none;
   }
   30% {
-    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.3);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
   }
 }
 
@@ -621,7 +586,7 @@ main {
 }
 
 .timeline__toggle:hover {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .timeline__chevron {
@@ -713,7 +678,7 @@ main {
 .chip.is-active {
   border-color: var(--accent);
   background: var(--accent);
-  color: #06222a;
+  color: var(--btn-primary-text);
   font-weight: 600;
 }
 
@@ -726,181 +691,6 @@ main {
   font-size: 0.8rem;
   color: var(--text-muted);
   font-style: italic;
-}
-
-/* Projects */
-
-.projects {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.project-card {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-elevated);
-  color: var(--text);
-  overflow: hidden;
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-
-.project-card__thumb {
-  flex-shrink: 0;
-  width: 72px;
-  height: 72px;
-  border-radius: calc(var(--radius) - 4px);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.project-card__thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.project-card__body {
-  flex: 1;
-  min-width: 0;
-}
-
-.project-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(280px circle at var(--x, 50%) var(--y, 50%), rgba(34, 211, 238, 0.14), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.project-card:hover::before {
-  opacity: 1;
-}
-
-.project-card:hover {
-  border-color: var(--accent);
-  text-decoration: none;
-  transform: translateY(-2px);
-}
-
-.project-card > * {
-  position: relative;
-}
-
-.project-card h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
-}
-
-.project-card__arrow {
-  color: var(--accent);
-  display: inline-block;
-  transition: transform 0.15s ease;
-}
-
-.project-card:hover .project-card__arrow {
-  transform: translate(2px, -2px);
-}
-
-.project-card p {
-  margin: 0 0 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-/* Cards with extra links: the title link is stretched over the whole card, and the
-   extra links sit above it so each stays separately clickable. */
-.project-card--multi .project-card__body {
-  position: static;
-}
-
-.project-card__stretch {
-  color: inherit;
-}
-
-.project-card__stretch:hover {
-  text-decoration: none;
-}
-
-.project-card__stretch::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.project-card--multi:has(.project-card__stretch:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.project-card__links {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  margin: 0 0 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-}
-
-.project-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 0.9rem;
-  margin: 0.6rem 0 0;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border);
-  list-style: none;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-
-.project-card__meta li {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  white-space: nowrap;
-}
-
-.project-card__meta-icon {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.project-card__ring {
-  position: relative;
-  flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-}
-
-.project-card__ring::after {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  border-radius: 50%;
-  background: var(--bg-elevated);
 }
 
 /* Footer */
@@ -954,41 +744,85 @@ main {
     font-size: 0.72rem;
   }
 
+  /* Narrow screens, two tiers: the toggles hang from short ropes at the far left and right, and
+     the two page tags hang centered between them on longer ropes. The tags' ropes pass through the
+     free gap between the toggles. display: contents lets the toggles join the nav's grid. */
+  body {
+    padding-top: 6.4rem;
+  }
+
+  .nav {
+    padding: 0 1rem;
+  }
+
+  .nav__right {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .nav__toggles {
+    display: contents;
+  }
+
   .nav__links {
-    /* Even English's shortest link set no longer fits alongside the brand
-       mark and both toggle buttons below this width (nav content needs
-       ~450-500px+; verified there's no scroll affordance if it overflows -
-       content just clips silently past the viewport edge). Sections are
-       still reachable by scrolling, so drop the quick-jump links rather
-       than let them crowd out the toggles that have no other way in. */
-    display: none;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: center;
+    gap: 0.5rem;
   }
 
-  .project-card__thumb {
-    width: 48px;
-    height: 48px;
-    font-size: 0.85rem;
+  .hang--lang {
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  .project-card__ring {
-    width: 40px;
-    height: 40px;
+  .hang--theme {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
   }
 
-  .project-card__ring::after {
-    inset: 7px;
+  .nav-tag {
+    padding: 0.38rem 0.8rem;
+    font-size: 0.82rem;
   }
 
-  .hero__note {
-    /* Absolute + left:100% pushes it off-screen once the name fills most of
-       a narrow viewport, so drop it into normal flow underneath instead. */
-    position: static;
-    display: block;
-    margin: 0.25rem 0 0 0.25rem;
+  .nav__links .hang:nth-child(1) { --rope: 58px; }
+  .nav__links .hang:nth-child(2) { --rope: 70px; }
+  .hang--lang { --rope: 22px; }
+  .hang--theme { --rope: 34px; }
+
+  .theme-toggle,
+  .lang-toggle {
+    height: 30px;
+  }
+
+  .theme-toggle__btn,
+  .lang-toggle__btn {
+    width: 28px;
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 380px) {
+  .nav {
+    padding: 0 0.75rem;
+  }
+
+  .nav__links {
+    gap: 0.35rem;
+  }
+
+  .nav-tag {
+    padding: 0.32rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .theme-toggle__btn,
+  .lang-toggle__btn {
+    width: 26px;
+  }
+}
+
+@media (max-width: 1180px) {
   .pipeline-annotation {
     /* Below this, the last node sits too close to the viewport edge for the
        mirrored text to have room, regardless of font-size/offset tuning. */
@@ -1004,10 +838,10 @@ main {
   --border: #e2e5e9;
   --text: #14181f;
   --text-muted: #5a6472;
-  --accent: #0891b2;
-  --accent-dim: #0e7490;
-  --nav-bg: rgba(250, 250, 250, 0.85);
-  --btn-primary-text: #ffffff;
+  --accent: #ca8a04;
+  --accent-ink: #a16207;
+  --accent-dim: #854d0e;
+  --btn-primary-text: #1c1400;
   --hero-glow-opacity: 0.6;
 }
 
@@ -1019,10 +853,10 @@ main {
   --border: #1e2732;
   --text: #e6edf3;
   --text-muted: #8b98a5;
-  --accent: #22d3ee;
-  --accent-dim: #0891b2;
-  --nav-bg: rgba(11, 15, 20, 0.85);
-  --btn-primary-text: #06222a;
+  --accent: #fbbf24;
+  --accent-ink: #fbbf24;
+  --accent-dim: #c8920a;
+  --btn-primary-text: #1c1400;
   --hero-glow-opacity: 1;
 }
 
@@ -1035,10 +869,10 @@ main {
     --border: #e2e5e9;
     --text: #14181f;
     --text-muted: #5a6472;
-    --accent: #0891b2;
-    --accent-dim: #0e7490;
-    --nav-bg: rgba(250, 250, 250, 0.85);
-    --btn-primary-text: #ffffff;
+    --accent: #ca8a04;
+    --accent-ink: #a16207;
+    --accent-dim: #854d0e;
+    --btn-primary-text: #1c1400;
     --hero-glow-opacity: 0.6;
   }
 }
@@ -1062,10 +896,6 @@ main {
     transition: none;
     opacity: 1;
     transform: none;
-  }
-
-  .hero__glow {
-    animation: none;
   }
 
   .pipeline__beam {

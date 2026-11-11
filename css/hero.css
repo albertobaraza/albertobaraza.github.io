@@ -1,0 +1,141 @@
+/* Shared hero: the big name, the role line and the one-sentence lede. Used by the home page
+   (with extra playful pieces from home.css) and by the Experience page. Every color is derived
+   from the theme tokens. */
+
+/* Hero */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  padding: 2.5rem 0 3.5rem;
+  --indent: clamp(0rem, 11vw, 9rem);
+}
+
+/* A page hero with no greeting note above the name (Experience) needs a little more air on top */
+.hero--page {
+  padding-top: clamp(3.5rem, 8vw, 5.5rem);
+}
+
+/* The glow of the hero bleeds a little past its bottom edge; make sure the sections that
+   follow paint above it instead of being tinted by it. */
+.hero ~ .section {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__name,
+.hero__title,
+.hero__lede {
+  position: relative;
+  z-index: 1;
+}
+
+/* Full-bleed layer behind the hero. It clips its own contents, so the glow can fill the
+   viewport (and the home page's orbit can hang off the edge) without widening the page. */
+.hero__deco {
+  position: absolute;
+  z-index: 0;
+  top: -40%;
+  bottom: -20%;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  overflow: hidden;
+  overflow: clip;
+  pointer-events: none;
+  /* fade out at the bottom so the glow never ends in a visible edge */
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+}
+
+.hero__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 40%, rgba(251, 191, 36, 0.2), transparent 52%),
+    radial-gradient(circle at 80% 60%, rgba(217, 119, 6, 0.15), transparent 50%),
+    radial-gradient(circle at 58% 14%, rgba(251, 146, 60, 0.11), transparent 42%);
+  filter: blur(40px);
+  opacity: var(--hero-glow-opacity);
+  animation: heroGlowDrift 16s ease-in-out infinite alternate;
+}
+
+@keyframes heroGlowDrift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(3%, -4%) scale(1.08);
+  }
+}
+
+
+
+.hero__name {
+  margin: 0;
+  font-size: clamp(3rem, 11.5vw, 7.75rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+.hero__first,
+.hero__last {
+  display: block;
+  width: fit-content;
+}
+
+.hero__last {
+  margin-left: clamp(1rem, 7.5vw, 6rem);
+  background: linear-gradient(100deg, var(--text) 8%, var(--accent-ink) 75%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* the descender of "z" would be clipped by the tight line-height otherwise */
+  padding-bottom: 0.08em;
+}
+
+.hero__title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0;
+  font-family: var(--font-mono);
+  font-size: clamp(0.95rem, 2.3vw, 1.15rem);
+  color: var(--text-muted);
+}
+
+.hero__title::before {
+  content: "";
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.hero__title::after {
+  content: "";
+  flex: none;
+  width: clamp(48px, 12vw, 140px);
+  height: 8px;
+  background: var(--accent);
+  opacity: 0.75;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 8' preserveAspectRatio='none'%3E%3Cpath d='M0 4Q8.75 0 17.5 4T35 4T52.5 4T70 4T87.5 4T105 4T122.5 4T140 4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 8' preserveAspectRatio='none'%3E%3Cpath d='M0 4Q8.75 0 17.5 4T35 4T52.5 4T70 4T87.5 4T105 4T122.5 4T140 4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+.hero__lede {
+  max-width: 38ch;
+  margin: 1.6rem 0 0 var(--indent);
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__glow {
+    animation: none;
+  }
+}
