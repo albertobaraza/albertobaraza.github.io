@@ -46,6 +46,7 @@ const translations = {
     "proj-more-desc": "View my repositories and contributions on GitHub.",
     "proj-more-desc-live": "Browse the rest of my repositories and contributions.",
     "proj-no-description": "No description provided.",
+    "proj-tapeo-dev-desc": "An open notebook of guides, notes, links and projects.",
 
     "apps-title": "Apps",
     "apps-what-the-bill-desc": "Your bills, charted. A dashboard that turns PDF invoices into cost and consumption trends, entirely in your browser: nothing is uploaded.",
@@ -174,6 +175,7 @@ const translations = {
     "proj-more-desc": "Mira mis repositorios y contribuciones en GitHub.",
     "proj-more-desc-live": "Explora el resto de mis repositorios y contribuciones.",
     "proj-no-description": "Sin descripción.",
+    "proj-tapeo-dev-desc": "Un cuaderno abierto de guías, notas, enlaces y proyectos.",
 
     "apps-title": "Apps",
     "apps-what-the-bill-desc": "Tus facturas, en gráficas. Un panel que convierte facturas en PDF en tendencias de coste y consumo, todo en tu navegador: no se sube nada.",
