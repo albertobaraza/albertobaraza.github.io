@@ -655,3 +655,36 @@ fetch("data/languages.json")
     });
     placeLanguageCharts();
   });
+
+// ---------------------------------------------------------------------------
+// Touch: a phone has no hover, so tapping a station's icon opens its language chart instead of
+// following the link, and any other tap (or Escape) closes it. The title and text still follow the
+// link. Only a touch pointer is intercepted: a mouse click or the keyboard (including on a touch
+// laptop) keeps its normal behavior. One delegated listener covers stations added later too.
+// ---------------------------------------------------------------------------
+let lastPointerType = "";
+document.addEventListener("pointerdown", (event) => (lastPointerType = event.pointerType), true);
+
+const closeLanguageCharts = (except) =>
+  document.querySelectorAll(".station--langs.is-peeking").forEach((station) => {
+    if (station !== except) station.classList.remove("is-peeking");
+  });
+
+document.addEventListener("click", (event) => {
+  const wasTouch = lastPointerType === "touch";
+  lastPointerType = ""; // so a later keyboard-triggered click isn't mistaken for a tap
+  const icon = event.target instanceof Element ? event.target.closest(".station--langs .station__icon") : null;
+
+  if (wasTouch && icon) {
+    event.preventDefault();
+    const station = icon.closest(".station--langs");
+    closeLanguageCharts(station);
+    station.classList.toggle("is-peeking");
+    return;
+  }
+  closeLanguageCharts();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeLanguageCharts();
+});

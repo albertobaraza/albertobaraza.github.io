@@ -434,12 +434,14 @@
   --peek: 0;
 }
 
-/* Keyboard focus opens it everywhere. Hover only on real pointers, so a tap on a phone doesn't
-   leave a sticky card behind. When the chart opens beside the card, hovering anywhere on the card
-   (icon or text) opens it. When there was no room and it opens across the text, only the icon
-   does: otherwise hovering the text to read it would cover what you're reading. (The multi-link
-   station's icon is its own link above the stretched one, so it can still be hovered on its own.) */
-.station--langs:is(:focus-visible, :has(.station__stretch:focus-visible)) {
+/* Keyboard focus opens it everywhere, and so does .is-peeking, which home.js sets when a touch
+   screen taps the icon (there is no hover on a phone). Hover only on real pointers, so a tap
+   doesn't leave a sticky card behind. When the chart opens beside the card, hovering anywhere on
+   the card (icon or text) opens it. When there was no room and it opens across the text, only the
+   icon does: otherwise hovering the text to read it would cover what you're reading. (The
+   multi-link station's icon is its own link above the stretched one, so it can still be hovered
+   on its own.) */
+.station--langs:is(:focus-visible, :has(.station__stretch:focus-visible), .is-peeking) {
   --peek: 1;
   --orbit-state: paused;
 }
@@ -453,7 +455,7 @@
 }
 
 /* Lift an open station above its neighbours so the card never slides under their text */
-.station--langs:is(:hover, :focus-within) {
+.station--langs:is(:hover, :focus-within, .is-peeking) {
   z-index: calc(var(--peek) * 4);
 }
 
