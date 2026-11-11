@@ -626,5 +626,32 @@ Promise.all(appStations.map(loadAppMeta)).then(() => {
     journeyMap.insertBefore(station, firstProject);
   });
   renderDates();
+  placeLanguageCharts();
   flow.rebuild();
 });
+
+// ---------------------------------------------------------------------------
+// Private projects: their repos can't be read from the browser, so a scheduled job
+// (.github/workflows/update-languages.yml) writes their language mix to data/languages.json and
+// the stations tagged with data-lang-key get the same ring and hover chart as the live GitHub
+// repos. No file, no entry for a project, or a failed request: the plain dashed orbit stays.
+// ---------------------------------------------------------------------------
+fetch("data/languages.json")
+  .then((res) => (res.ok ? res.json() : {}))
+  .catch(() => ({}))
+  .then((data) => {
+    const languagesByKey = data && typeof data === "object" ? data : {};
+    document.querySelectorAll("[data-lang-key]").forEach((station) => {
+      const key = station.dataset.langKey;
+      const slices = summarizeLanguages(Array.isArray(languagesByKey[key]) ? languagesByKey[key] : []);
+      const plainOrbit = station.querySelector(".station__orbit");
+      if (!slices.length || !plainOrbit) return;
+
+      plainOrbit.replaceWith(buildOrbit(slices));
+      const chartId = `lang-chart-${key}`;
+      station.classList.add("station--langs");
+      station.appendChild(buildLanguageChart(slices, chartId));
+      station.setAttribute("aria-describedby", chartId); // the station itself is the link here
+    });
+    placeLanguageCharts();
+  });

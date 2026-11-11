@@ -1,0 +1,65 @@
+# Keeps data/languages.json (the language ring + hover chart of the private projects on the
+# homepage) fresh. Private repos can't be read from the browser, so this job reads them with a
+# token and commits only the resulting percentages.
+#
+# One-time setup (Settings > Secrets and variables > Actions > Secrets). Both MUST be secrets and
+# not variables: this repo and its logs are public, and only secrets are masked in the logs.
+#   LANGUAGE_STATS_TOKEN  a fine-grained personal access token whose resource owner is the owner of
+#                         the private repos, with access to those repos and the read-only
+#                         "Metadata" permission (nothing else).
+#   LANGUAGE_STATS_REPOS  one-line JSON, project key -> "owner/repo", the keys being the
+#                         data-lang-key values in index.html, e.g. {"what-the-bill":"owner/repo"}
+name: Update project languages
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit the refreshed data file
+  pages: write # ask Pages to rebuild afterwards (see the last step)
+
+concurrency:
+  group: update-languages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch language stats
+        env:
+          GH_TOKEN: ${{ secrets.LANGUAGE_STATS_TOKEN }}
+          LANGUAGE_STATS_REPOS: ${{ secrets.LANGUAGE_STATS_REPOS }}
+        run: node scripts/update-languages.mjs
+
+      - name: Commit if changed
+        id: commit
+        run: |
+          if [ -z "$(git status --porcelain -- data/languages.json)" ]; then
+            echo "Nothing changed."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/languages.json
+          git commit -m "chore: language stats refreshed for the private projects"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # Not every push made with the built-in token is guaranteed to start a Pages build, so ask for
+      # one explicitly. Harmless if one was already started.
+      - name: Rebuild Pages
+        if: steps.commit.outputs.changed == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/${{ github.repository }}/pages/builds"
