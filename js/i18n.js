@@ -16,8 +16,6 @@ const translations = {
     "hero-title": "Senior Data Engineer",
     "hero-lede": `
         Well-defined workflows and a clear objective. The foundation of a great project.
-        I like working close to the hard problems,
-        mentoring people around me, and building with a clear purpose.
       `,
     "hero-email-btn": "Email",
 
@@ -144,8 +142,6 @@ const translations = {
     "hero-title": "Ingeniero de Datos Senior",
     "hero-lede": `
         Flujos de trabajo bien definidos y un objetivo claro. La base de un gran proyecto.
-        Me gusta trabajar cerca de los problemas difíciles,
-        mentorizar a la gente que me rodea y construir con un propósito claro.
       `,
     "hero-email-btn": "Correo",
 
