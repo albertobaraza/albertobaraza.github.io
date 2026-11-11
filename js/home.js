@@ -254,12 +254,35 @@ const EXTRA_LINKS = {
   ],
 };
 
-// Returns [name, bytes] pairs sorted by share of the repo, largest first.
+// Returns [name, bytes] pairs sorted by share of the repo, largest first. Rejects when the request
+// fails (e.g. rate-limited), so a failure is never mistaken for "this repo has no languages".
 const fetchTopLanguages = (repo) =>
   fetch(repo.languages_url)
-    .then((res) => (res.ok ? res.json() : {}))
-    .then((bytesByLanguage) => Object.entries(bytesByLanguage).sort((a, b) => b[1] - a[1]))
-    .catch(() => []);
+    .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+    .then((bytesByLanguage) => Object.entries(bytesByLanguage).sort((a, b) => b[1] - a[1]));
+
+// GitHub allows 60 un-authenticated API requests an hour per IP and one page load costs 5, so a few
+// reloads (or a busy shared IP) would run the repo stations dry. The last complete answer is kept in
+// localStorage for an hour, and if a refresh fails the last good one is shown whatever its age.
+const REPOS_CACHE_KEY = "github-repos-v1";
+const REPOS_CACHE_TTL = 60 * 60 * 1000;
+
+const readReposCache = () => {
+  try {
+    const cached = JSON.parse(localStorage.getItem(REPOS_CACHE_KEY));
+    return cached && Array.isArray(cached.projects) && Number.isFinite(cached.savedAt) ? cached : null;
+  } catch {
+    return null; // storage blocked or the entry is garbled: behave as if there were no cache
+  }
+};
+
+const writeReposCache = (projects) => {
+  try {
+    localStorage.setItem(REPOS_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), projects }));
+  } catch {
+    // storage blocked or full: just no caching
+  }
+};
 
 // GitHub linguist colors for common languages; unlisted languages fall back to the site accent.
 const LANGUAGE_COLORS = {
@@ -550,35 +573,69 @@ const buildRepoStation = (repo, languages) => {
   return station;
 };
 
+// Resolves to [{ repo, languages }] for the repo stations: from the cache while it's fresh, else
+// from GitHub (and then cached), else from a stale cache. Rejects only when there's nothing to show.
+const loadRepoProjects = async () => {
+  const cached = readReposCache();
+  if (cached && Date.now() - cached.savedAt < REPOS_CACHE_TTL) return cached.projects;
+
+  try {
+    const res = await fetch("https://api.github.com/users/albertobaraza/repos?sort=pushed&per_page=100");
+    if (!res.ok) throw new Error(`GitHub answered ${res.status}`);
+    const repos = await res.json();
+
+    const top = repos
+      .filter((repo) => !repo.fork && !repo.private && !repo.archived && !EXCLUDED_REPOS.has(repo.name))
+      .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
+      .slice(0, 4);
+
+    const stats = await Promise.all(top.map((repo) => fetchTopLanguages(repo).catch(() => null)));
+    const projects = top.map((repo, i) => ({
+      // Only what the station needs, so the cache stays small
+      repo: {
+        id: repo.id,
+        name: repo.name,
+        html_url: repo.html_url,
+        description: repo.description,
+        pushed_at: repo.pushed_at,
+        license: repo.license ? { spdx_id: repo.license.spdx_id } : null,
+      },
+      languages: stats[i] || [],
+    }));
+
+    if (stats.every(Boolean)) writeReposCache(projects);
+    // Rate-limited part-way: the last complete answer beats one with missing language rings
+    else if (cached) return cached.projects;
+    return projects;
+  } catch (error) {
+    if (cached) return cached.projects;
+    throw error;
+  }
+};
+
 if (journeyMap && moreStation) {
-  fetch("https://api.github.com/users/albertobaraza/repos?sort=pushed&per_page=100")
-    .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-    .then((repos) => {
-      const top = repos
-        .filter((repo) => !repo.fork && !repo.private && !repo.archived && !EXCLUDED_REPOS.has(repo.name))
-        .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
-        .slice(0, 4);
+  loadRepoProjects()
+    .then((projects) => {
+      if (!projects.length) return;
 
-      if (!top.length) return;
+      // Now that repo stations precede it, "browse the rest" reads correctly
+      // instead of the plain fallback wording used when it's the only extra stop.
+      const moreDesc = moreStation.querySelector('[data-i18n="proj-more-desc"]');
+      if (moreDesc) {
+        moreDesc.dataset.i18n = "proj-more-desc-live";
+        moreDesc.innerHTML = window.i18n.t("proj-more-desc-live");
+      }
 
-      return Promise.all(top.map((repo) => fetchTopLanguages(repo))).then((stats) => {
-        // Now that repo stations precede it, "browse the rest" reads correctly
-        // instead of the plain fallback wording used when it's the only extra stop.
-        const moreDesc = moreStation.querySelector('[data-i18n="proj-more-desc"]');
-        if (moreDesc) {
-          moreDesc.dataset.i18n = "proj-more-desc-live";
-          moreDesc.innerHTML = window.i18n.t("proj-more-desc-live");
-        }
+      projects.forEach(({ repo, languages }) =>
+        journeyMap.insertBefore(buildRepoStation(repo, languages), moreStation),
+      );
 
-        top.forEach((repo, i) => journeyMap.insertBefore(buildRepoStation(repo, stats[i]), moreStation));
-
-        renderDates();
-        placeLanguageCharts();
-        flow.rebuild();
-      });
+      renderDates();
+      placeLanguageCharts();
+      flow.rebuild();
     })
     .catch(() => {
-      // Network error, rate limit, or no JS: the static stations stay as they are
+      // Network error, rate limit and nothing cached, or no JS: the static stations stay as they are
     });
 }
 
