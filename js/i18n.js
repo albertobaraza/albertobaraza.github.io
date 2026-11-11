@@ -14,7 +14,7 @@ const translations = {
     "hero-hi": "Hello there!",
     "hero-title": "Senior Data Engineer",
     "hero-lede": `
-        I spend my days wrangling data for a living, and my evenings building random stuff just because it sounds fun.
+        I spend my days wrangling data for a living, and my evenings building random stuff.
       `,
 
     "about-title": "About",
@@ -138,7 +138,7 @@ const translations = {
     "hero-hi": "¡Hola!",
     "hero-title": "Ingeniero de Datos Senior",
     "hero-lede": `
-        Me paso los días domando datos para ganarme la vida y las noches construyendo cosas al azar solo porque suena divertido.
+        Me paso los días domando datos para ganarme la vida y las noches construyendo cosas al azar.
       `,
 
     "about-title": "Sobre mí",
