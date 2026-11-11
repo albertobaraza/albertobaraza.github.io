@@ -1,0 +1,649 @@
+/* Home page only (loaded after style.css). The Experience page deliberately
+   keeps the plain, structured CV look from style.css; everything expressive
+   lives here, scoped under body.home or to home-only class names. Every color
+   is derived from the theme tokens, so light/dark/system all work. */
+
+.home {
+  --dot: color-mix(in srgb, var(--text-muted) 30%, transparent);
+  --track: color-mix(in srgb, var(--text-muted) 45%, transparent);
+  --glow: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* Background: dot grid + accent dots revealed around the pointer */
+
+.home-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 1.6px);
+  background-size: 30px 30px;
+}
+
+.home-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, var(--accent) 1.5px, transparent 2.1px);
+  background-size: 30px 30px;
+  -webkit-mask-image: radial-gradient(circle 200px at var(--mx, -400px) var(--my, -400px), #000 0%, transparent 100%);
+  mask-image: radial-gradient(circle 200px at var(--mx, -400px) var(--my, -400px), #000 0%, transparent 100%);
+}
+
+/* Layout */
+
+.home-main {
+  position: relative;
+  max-width: 1100px;
+  /* room for the closing pin of the journey, right above the footer */
+  padding-bottom: 7rem;
+}
+
+/* Flow: the pipeline that runs through the page */
+
+.flow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.flow__track {
+  fill: none;
+  stroke: var(--track);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 9;
+  stroke-linecap: round;
+}
+
+.flow__line,
+.flow__glow {
+  fill: none;
+  stroke: var(--accent);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.flow__line {
+  stroke-width: 2.5;
+}
+
+/* A wide faint stroke under the line; much cheaper to repaint on scroll than a blur filter
+   over the full height of the page. */
+.flow__glow {
+  stroke-width: 9;
+  opacity: 0.16;
+}
+
+.flow__beam {
+  fill: var(--accent);
+  opacity: 0;
+  filter: drop-shadow(0 0 5px var(--accent)) drop-shadow(0 0 12px var(--accent));
+}
+
+.flow-pin {
+  position: absolute;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--track);
+  background: var(--bg);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.flow-pin::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--track);
+  transition: background 0.4s ease;
+}
+
+.hero__pin,
+.flow-pin.is-lit {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 16%, transparent), 0 0 18px var(--glow);
+}
+
+.hero__pin::after,
+.flow-pin.is-lit::after {
+  background: var(--accent);
+}
+
+/* Hero extras that only the home page has (the shared hero is in hero.css). */
+
+/* Room below the buttons for the flow's starting pin */
+.home .hero {
+  padding-bottom: 7rem;
+}
+
+/* No role line between the name and the lede here (it lives on the Experience page) */
+.home .hero__lede {
+  margin-top: 2.25rem;
+}
+
+.hero__orbit {
+  position: absolute;
+  /* the layer starts 40% of the hero above it, so 25% is the top of the hero */
+  top: 26%;
+  /* hug the right edge of the 1100px content column; overhang the viewport on narrow screens */
+  right: max(-8vw, calc(50vw - 670px));
+  width: min(62vw, 520px);
+  aspect-ratio: 1;
+}
+
+.hero__orbit i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--accent) 38%, transparent);
+  animation: orbitSpin 70s linear infinite;
+}
+
+.hero__orbit i:nth-child(2) {
+  inset: 15%;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  animation-duration: 44s;
+  animation-direction: reverse;
+}
+
+.hero__orbit i:nth-child(3) {
+  inset: 32%;
+  animation-duration: 30s;
+}
+
+.hero__orbit i::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+@keyframes orbitSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hero__hello,
+.hero__links {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__hello {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  width: fit-content;
+  margin-bottom: 0.55rem;
+  color: var(--accent-ink);
+  rotate: -4deg;
+}
+
+.hero__note {
+  margin: 0;
+  font-family: var(--font-hand);
+  font-size: clamp(2.3rem, 6.4vw, 3.7rem);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.hero__hello-arrow {
+  width: clamp(54px, 8vw, 80px);
+  height: auto;
+  margin-bottom: -1.2rem;
+}
+
+.hero__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1rem;
+  margin: 2rem 0 0 var(--indent);
+}
+
+.hero__pin {
+  left: calc(var(--indent) + 1.6rem);
+  bottom: 2.25rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 70%, transparent);
+  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: rotate 0.25s ease, translate 0.25s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn:nth-child(odd) {
+  rotate: -2.5deg;
+}
+
+.btn:nth-child(even) {
+  rotate: 2deg;
+  translate: 0 0.4rem;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  rotate: 0deg;
+  translate: 0 -2px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--btn-primary-text);
+  text-decoration: none;
+}
+
+.btn__arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.btn:hover .btn__arrow {
+  transform: translate(2px, -2px);
+}
+
+/* Journey: every app and project is a station on the same line (mobile-first; the
+   staggered desktop composition is in the media query below). */
+
+.journey {
+  position: relative;
+  z-index: 1;
+  padding-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.journey__map {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.4rem, 9vw, 8rem);
+}
+
+.station {
+  --icon: 76px;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  width: fit-content;
+  max-width: 100%;
+  color: var(--text);
+}
+
+.station:nth-child(even) {
+  margin-left: 20px;
+}
+
+.station:hover {
+  text-decoration: none;
+}
+
+/* Hover panel around the whole station. It's a pseudo-element because .reveal puts a staggered
+   transition-delay on the body, which would otherwise delay the hover feedback too. */
+.station::before {
+  content: "";
+  position: absolute;
+  inset: -0.7rem -1rem;
+  z-index: -1;
+  border-radius: 30px 10px 30px 10px;
+  background: color-mix(in srgb, var(--node-color) 8%, var(--bg-elevated));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--node-color) 45%, transparent),
+    0 22px 50px -24px color-mix(in srgb, var(--node-color) 60%, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.station:hover::before,
+.station:focus-visible::before,
+.station--multi:has(.station__stretch:focus-visible)::before {
+  opacity: 1;
+}
+
+.station:focus-visible {
+  outline: none;
+}
+
+.station__icon {
+  position: relative;
+  flex: none;
+  width: var(--icon);
+  height: var(--icon);
+  border-radius: 30%;
+  rotate: var(--tilt, -4deg);
+  scale: 0.92;
+  transition: scale 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), rotate 0.35s ease;
+}
+
+.station:nth-child(6n + 1) { --tilt: -5deg; }
+.station:nth-child(6n + 2) { --tilt: 4deg; }
+.station:nth-child(6n + 3) { --tilt: -3deg; }
+.station:nth-child(6n + 4) { --tilt: 6deg; }
+.station:nth-child(6n + 5) { --tilt: -4deg; }
+.station:nth-child(6n + 6) { --tilt: 3deg; }
+
+/* The artwork: an app icon, or a generated tile (repo initials / GitHub mark) */
+.station__icon > img,
+.station__thumb {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  opacity: 0.8;
+  transition: opacity 0.4s ease;
+}
+
+.station__icon > img {
+  object-fit: cover;
+}
+
+.station__thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: calc(var(--icon) * 0.28);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.station__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Halo behind the icon, switched on when the pipeline reaches this station */
+.station__icon::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--node-color) 55%, transparent), transparent 68%);
+  opacity: 0;
+  scale: 0.6;
+  transition: opacity 0.5s ease, scale 0.6s ease;
+}
+
+.station__orbit {
+  position: absolute;
+  inset: -13%;
+  z-index: 0;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--node-color) 65%, transparent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: orbitSpin 26s linear infinite;
+  pointer-events: none;
+}
+
+.station__orbit::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--node-color);
+  box-shadow: 0 0 8px var(--node-color);
+}
+
+/* A repo's orbit is its language mix: a thin segmented ring (background set by home.js) */
+.station__orbit--langs {
+  inset: -14%;
+  border: 0;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  animation-duration: 50s;
+  pointer-events: auto;
+}
+
+.station__orbit--langs::after {
+  display: none;
+}
+
+.station.is-lit .station__icon {
+  scale: 1;
+}
+
+.station.is-lit .station__icon > img,
+.station.is-lit .station__thumb {
+  opacity: 1;
+}
+
+.station.is-lit .station__icon::before {
+  opacity: 0.85;
+  scale: 1;
+}
+
+.station.is-lit .station__orbit {
+  opacity: 1;
+}
+
+.station:hover .station__icon,
+.station:focus-visible .station__icon {
+  scale: 1.08;
+  rotate: 0deg;
+}
+
+/* Version (apps) or license (repos), pinned to the icon */
+.station__badge {
+  position: absolute;
+  right: -0.5rem;
+  bottom: -0.35rem;
+  z-index: 2;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--node-color) 60%, var(--border));
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  rotate: 4deg;
+}
+
+.station__body {
+  position: relative;
+  max-width: 26rem;
+  padding: 0.85rem 1.1rem;
+}
+
+/* Handwritten line above the title: release date (apps) or last commit (repos) */
+.station__date {
+  display: block;
+  margin-bottom: 0.1rem;
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--node-color) 70%, var(--text));
+  rotate: -2deg;
+  transform-origin: left center;
+}
+
+.station__date:empty {
+  display: none;
+}
+
+.station__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.3rem, 3vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.station__arrow {
+  display: inline-block;
+  color: var(--node-color);
+  transition: transform 0.2s ease;
+}
+
+.station:hover .station__arrow {
+  transform: translate(3px, -3px);
+}
+
+.station__body p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+/* A station with extra links can't be one big <a> (links can't nest), so it is a div whose
+   title link is stretched over the whole station, and the extra links sit above it. */
+.station--multi .station__body {
+  position: static;
+}
+
+/* Once revealed, drop the transform: a transformed body would become the containing block for
+   the stretched link and shrink it to just the text. */
+.station--multi .station__body.is-visible {
+  transform: none;
+}
+
+.station__stretch {
+  color: inherit;
+}
+
+.station__stretch:hover {
+  text-decoration: none;
+}
+
+.station__stretch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.station__links {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.55rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+/* The journey's closing node, just above the footer call to action */
+.journey__pin {
+  left: 50%;
+  bottom: 1.25rem;
+  margin-left: -9px;
+}
+
+/* Footer */
+
+.home .footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
+  padding-top: 1.5rem;
+  border-top: none;
+}
+
+.home .footer > p:first-child {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+/* Desktop: the staggered composition. Odd stations sit left of the line's swerve with the text
+   on the right; even ones mirror that. --x is where the icon's center lands (% of the column). */
+
+@media (min-width: 721px) {
+  .station {
+    --icon: clamp(92px, 11vw, 120px);
+    gap: 1.75rem;
+    margin-left: calc(var(--x) - var(--icon) / 2);
+  }
+
+  .station:nth-child(even) {
+    flex-direction: row-reverse;
+    margin-left: auto;
+    margin-right: calc(100% - var(--x) - var(--icon) / 2);
+  }
+
+  .station:nth-child(even) .station__body {
+    text-align: right;
+  }
+
+  .station:nth-child(even) .station__links {
+    justify-content: flex-end;
+  }
+
+  .station:nth-child(12n + 1) { --x: 14%; }
+  .station:nth-child(12n + 2) { --x: 82%; }
+  .station:nth-child(12n + 3) { --x: 32%; }
+  .station:nth-child(12n + 4) { --x: 68%; }
+  .station:nth-child(12n + 5) { --x: 9%; }
+  .station:nth-child(12n + 6) { --x: 58%; }
+  .station:nth-child(12n + 7) { --x: 24%; }
+  .station:nth-child(12n + 8) { --x: 78%; }
+  .station:nth-child(12n + 9) { --x: 12%; }
+  .station:nth-child(12n + 10) { --x: 64%; }
+  .station:nth-child(12n + 11) { --x: 36%; }
+  .station:nth-child(12n + 12) { --x: 72%; }
+}
+
+@media (max-width: 720px) {
+  .hero__orbit {
+    right: -22vw;
+    opacity: 0.6;
+  }
+}
+
+/* Touch devices have no pointer to light the grid with */
+@media (hover: none), (pointer: coarse) {
+  .home-bg::after {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__orbit i,
+  .station__orbit {
+    animation: none;
+  }
+
+  .station__icon,
+  .station__icon > img,
+  .station__thumb,
+  .station__icon::before,
+  .btn {
+    transition: none;
+  }
+
+  .home-bg::after {
+    display: none;
+  }
+}
