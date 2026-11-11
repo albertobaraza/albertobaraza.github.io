@@ -832,6 +832,43 @@ main {
   font-size: 0.9rem;
 }
 
+/* Cards with extra links: the title link is stretched over the whole card, and the
+   extra links sit above it so each stays separately clickable. */
+.project-card--multi .project-card__body {
+  position: static;
+}
+
+.project-card__stretch {
+  color: inherit;
+}
+
+.project-card__stretch:hover {
+  text-decoration: none;
+}
+
+.project-card__stretch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.project-card--multi:has(.project-card__stretch:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.project-card__links {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
 .project-card__meta {
   display: flex;
   flex-wrap: wrap;

@@ -285,6 +285,13 @@ document.querySelectorAll(".project-card").forEach(addSpotlight);
 const projectsContainer = document.querySelector("#projects .projects");
 const EXCLUDED_REPOS = new Set(["albertobaraza", "albertobaraza.github.io"]);
 
+// Extra public links per repo ([label, url]), shown on its card next to the main repo link.
+const EXTRA_LINKS = {
+  "claude-limits-meter": [
+    ["VS Code Marketplace", "https://marketplace.visualstudio.com/items?itemName=albertobaraza.claude-limits-meter"],
+  ],
+};
+
 // Returns [name, bytes] pairs sorted by share of the repo, largest first.
 const fetchTopLanguages = (repo) =>
   fetch(repo.languages_url)
@@ -435,19 +442,26 @@ if (projectsContainer) {
         top.forEach((repo, i) => {
           const languages = stats[i];
 
-          const card = document.createElement("a");
-          card.className = "project-card reveal is-visible";
+          // A link can't nest inside another, so a card with extra links is a div whose
+          // title link is stretched over the whole card (see .project-card--multi).
+          const extraLinks = EXTRA_LINKS[repo.name] || [];
+          const hasExtra = extraLinks.length > 0;
+
+          const card = document.createElement(hasExtra ? "div" : "a");
+          card.className = "project-card reveal is-visible" + (hasExtra ? " project-card--multi" : "");
           card.style.setProperty("--i", String(i + 1));
-          card.href = repo.html_url;
-          card.target = "_blank";
-          card.rel = "noopener";
+
+          const repoLink = hasExtra ? document.createElement("a") : card;
+          repoLink.href = repo.html_url;
+          repoLink.target = "_blank";
+          repoLink.rel = "noopener";
+          if (hasExtra) repoLink.className = "project-card__stretch";
 
           const title = document.createElement("h3");
-          title.textContent = `${repo.name} `;
           const arrow = document.createElement("span");
           arrow.className = "project-card__arrow";
           arrow.textContent = "↗";
-          title.appendChild(arrow);
+          (hasExtra ? title.appendChild(repoLink) : title).append(`${repo.name} `, arrow);
 
           const desc = document.createElement("p");
           desc.textContent = repo.description || window.i18n.t("proj-no-description");
@@ -455,6 +469,20 @@ if (projectsContainer) {
           const body = document.createElement("div");
           body.className = "project-card__body";
           body.append(title, desc);
+
+          if (hasExtra) {
+            const links = document.createElement("div");
+            links.className = "project-card__links";
+            extraLinks.forEach(([label, href]) => {
+              const a = document.createElement("a");
+              a.href = href;
+              a.target = "_blank";
+              a.rel = "noopener";
+              a.textContent = `${label} ↗`;
+              links.appendChild(a);
+            });
+            body.appendChild(links);
+          }
 
           const meta = buildMetaRow(repo);
           if (meta) body.appendChild(meta);
