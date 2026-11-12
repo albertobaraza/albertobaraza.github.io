@@ -8,7 +8,7 @@ const translations = {
     "meta-title-experience": "Alberto Baraza, Experience",
     "meta-description-experience": "Alberto Baraza's career as a data engineer, from BI analyst to senior: roles, what I built, and the tools I use.",
 
-    "nav-home": "Home",
+    "nav-projects": "Projects",
     "nav-experience": "Experience",
     "coffee-short": "Buy me a coffee",
     "coffee-label": "Buy me a coffee (opens in a new tab)",
@@ -139,7 +139,7 @@ const translations = {
     "meta-title-experience": "Alberto Baraza, Experiencia",
     "meta-description-experience": "La trayectoria de Alberto Baraza como ingeniero de datos, de analista BI a senior: puestos, lo que he construido y las herramientas que uso.",
 
-    "nav-home": "Inicio",
+    "nav-projects": "Proyectos",
     "nav-experience": "Experiencia",
     "coffee-short": "Invítame a un café",
     "coffee-label": "Invítame a un café (se abre en una pestaña nueva)",
