@@ -272,10 +272,60 @@
     <p class="footer__count" id="visit-count" hidden></p>
   </footer>
 
+  <!-- Easter egg: the very last corner of the page peels off, and a duck is hiding under it (js/duck.js). It stays folded over once pulled.
+       Everything is drawn in a 310 x 310 box whose bottom-right corner is the page's corner. -->
+  <div class="peel" id="peel">
+    <svg class="peel__art" viewBox="0 0 310 310" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id="peel-hole-clip"><polygon id="peel-hole-poly" points=""/></clipPath>
+        <pattern id="peel-dots" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+          <circle cx="4.5" cy="4.5" r="1.5" fill="#d97706" opacity=".3"/>
+        </pattern>
+        <linearGradient id="peel-hole-grad" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#000" stop-opacity=".42"/>
+          <stop offset="1" stop-color="#000" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="peel-flap-grad" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#000" stop-opacity=".24"/>
+          <stop offset=".45" stop-color="#000" stop-opacity=".05"/>
+          <stop offset="1" stop-color="#fff" stop-opacity=".07"/>
+        </linearGradient>
+        <filter id="peel-shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#000" flood-opacity=".38"/>
+        </filter>
+      </defs>
+
+      <!-- What is under the page: only the part inside the peeled triangle shows -->
+      <g clip-path="url(#peel-hole-clip)">
+        <rect width="310" height="310" fill="#fbbf24"/>
+        <path id="peel-rays" fill="#fcd34d"/>
+        <rect width="310" height="310" fill="url(#peel-dots)"/>
+
+        <!-- The duck. Its picture is only fetched once the corner is lifted (duck.js), so a visitor who never finds it never loads it.
+             It hops when it appears and then sways a little (home.css). -->
+        <g transform="translate(246 302)">
+          <ellipse cx="2" cy="1" rx="34" ry="4.5" fill="#000" opacity=".18"/>
+          <g class="peel__hop">
+            <image class="peel__sway" data-src="assets/easter-egg/duck.webp" x="-44" y="-125" width="88" height="125" preserveAspectRatio="xMidYMax meet"/>
+          </g>
+        </g>
+
+        <rect width="310" height="310" fill="url(#peel-hole-grad)"/>
+      </g>
+
+      <polygon class="peel__flap" id="peel-flap" points=""/>
+      <polygon id="peel-flap-shade" fill="url(#peel-flap-grad)" points=""/>
+    </svg>
+
+    <div class="peel__zone" aria-hidden="true"></div>
+    <p class="peel__say" role="status" data-i18n="duck-found" hidden>Quack! Congratulations, you found me!</p>
+  </div>
+
   <script src="js/i18n.js"></script>
   <script src="js/main.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/home.js"></script>
+  <script src="js/duck.js"></script>
   <span id="page-end" hidden></span>
 </body>
 </html>

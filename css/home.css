@@ -702,3 +702,159 @@
     display: none;
   }
 }
+
+/* Easter egg: a duck hides under the very last corner of the page (duck.js). The box is anchored to
+   the bottom-right of the document (not the window), so it is only on screen at the end of the
+   page and scrolls away with it like any other part of it. Everything inside is drawn in a
+   310 x 310 design box; duck.js sets --k to scale it down on narrow windows. */
+body.home {
+  position: relative;
+}
+
+.peel {
+  --k: 1;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  width: calc(310px * var(--k));
+  height: calc(310px * var(--k));
+  pointer-events: none;
+}
+
+.peel__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The only part that takes the pointer: a small square in the very corner. A finger (which has no
+   hover) first taps it to lift the corner; only then does a drag on it stop scrolling the page. */
+.peel__zone {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 80px;
+  height: 80px;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.peel.is-armed .peel__zone {
+  touch-action: none;
+  cursor: grab;
+}
+
+.peel.is-held .peel__zone {
+  cursor: grabbing;
+}
+
+.peel.is-open .peel__zone {
+  pointer-events: none;
+}
+
+/* The back of the paper: the page's own colour, shaded where it bends, lifted off the page by a
+   soft shadow */
+.peel__flap {
+  fill: var(--bg-elevated);
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  filter: url(#peel-shadow);
+}
+
+/* The duck hops when the hole opens, then sways a little, as if it were pleased */
+.peel.is-open .peel__hop {
+  animation: peel-hop 0.9s 0.3s ease-out both;
+}
+
+.peel.is-open .peel__sway {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: peel-sway 1.3s 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes peel-hop {
+  0% { transform: translateY(0); }
+  35% { transform: translateY(-16px); }
+  65% { transform: translateY(0); }
+  82% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes peel-sway {
+  from { transform: rotate(-1.8deg); }
+  to { transform: rotate(1.8deg); }
+}
+
+/* The duck's words: above the cut edge, its tail pointing down at its head */
+.peel__say {
+  position: absolute;
+  right: calc(26px * var(--k));
+  bottom: calc(190px * var(--k));
+  width: max-content;
+  max-width: min(15.5rem, 62vw);
+  margin: 0;
+  padding: 0.45rem 0.95rem 0.55rem;
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 2px solid var(--accent-line);
+  border-radius: 1rem;
+  box-shadow: 0 6px 18px color-mix(in srgb, #000 28%, transparent);
+  opacity: 0;
+  transform: translateY(10px) scale(0.5);
+  transform-origin: calc(100% - 2.4rem) 100%;
+  transition: opacity 0.25s ease, transform 0.5s var(--spring);
+}
+
+.peel__say[hidden] {
+  display: none;
+}
+
+.peel__say::after {
+  content: "";
+  position: absolute;
+  right: calc(38px * var(--k) - 7px);
+  bottom: -9px;
+  width: 14px;
+  height: 14px;
+  background: var(--bg-elevated);
+  border-right: 2px solid var(--accent-line);
+  border-bottom: 2px solid var(--accent-line);
+  transform: rotate(45deg);
+}
+
+.peel__say.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+/* After a while it goes quiet, so it doesn't sit on the footer for good */
+.peel__say.is-shown.is-quiet {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peel__say {
+    transition: none;
+  }
+
+  .peel.is-open .peel__hop,
+  .peel.is-open .peel__sway {
+    animation: none;
+  }
+}
+
+/* The switch that turns the swinging off turns this off too (also set for reduced motion) */
+.nav-still .peel.is-open .peel__hop,
+.nav-still .peel.is-open .peel__sway {
+  animation: none;
+}
