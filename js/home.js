@@ -715,9 +715,12 @@ fetch("data/languages.json")
 
 // ---------------------------------------------------------------------------
 // Touch: a phone has no hover, so tapping a station's icon opens its language chart instead of
-// following the link, and any other tap (or Escape) closes it. The title and text still follow the
-// link. Only a touch pointer is intercepted: a mouse click or the keyboard (including on a touch
-// laptop) keeps its normal behavior. One delegated listener covers stations added later too.
+// following the link, and any other tap (or Escape) closes it. While no chart is open the title and
+// text follow the link as usual, but the tap that closes an open chart only closes it: it must not
+// also follow whatever link happens to be underneath (another card, the same card, or the chart,
+// which lives inside its station's link). Only a touch pointer is intercepted: a mouse click or the
+// keyboard (including on a touch laptop) keeps its normal behavior. One delegated listener covers
+// stations added later too.
 // ---------------------------------------------------------------------------
 let lastPointerType = "";
 document.addEventListener("pointerdown", (event) => (lastPointerType = event.pointerType), true);
@@ -738,6 +741,11 @@ document.addEventListener("click", (event) => {
     closeLanguageCharts(station);
     station.classList.toggle("is-peeking");
     return;
+  }
+
+  // This tap is dismissing an open chart: swallow the link it landed on. The next tap is a normal one.
+  if (wasTouch && document.querySelector(".station--langs.is-peeking") && event.target instanceof Element) {
+    if (event.target.closest("a[href]")) event.preventDefault();
   }
   closeLanguageCharts();
 });
