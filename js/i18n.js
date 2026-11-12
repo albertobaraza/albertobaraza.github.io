@@ -3,7 +3,7 @@
 // is authored by us, never user input.
 const translations = {
   en: {
-    "meta-title": "Alberto Baraza, Data Engineer",
+    "meta-title": "Alberto Baraza",
     "meta-description": "Alberto Baraza, Senior Data Engineer. Clean pipelines, solid architecture, and systems that don't break.",
     "meta-title-experience": "Alberto Baraza, Experience",
     "meta-description-experience": "Alberto Baraza's career as a data engineer, from BI analyst to senior: roles, what I built, and the tools I use.",
@@ -131,7 +131,7 @@ const translations = {
   },
 
   es: {
-    "meta-title": "Alberto Baraza, Ingeniero de Datos",
+    "meta-title": "Alberto Baraza",
     "meta-description": "Alberto Baraza, Ingeniero de Datos Senior. Pipelines limpios, arquitectura sólida y sistemas que no fallan.",
     "meta-title-experience": "Alberto Baraza, Experiencia",
     "meta-description-experience": "La trayectoria de Alberto Baraza como ingeniero de datos, de analista BI a senior: puestos, lo que he construido y las herramientas que uso.",
