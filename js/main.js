@@ -1,4 +1,5 @@
-// Shared by every page: footer year, scroll reveal, theme toggle (the hanging nav is in nav.js).
+// Shared by every page: footer year, scroll reveal, theme toggle, the page-to-page slide opt-out
+// (the hanging nav is in nav.js).
 // Page-specific behavior lives in home.js and experience.js, which load after
 // this file and rely on `reducedMotion` below (top-level consts are shared
 // across classic scripts, so don't redeclare it there).
@@ -105,4 +106,37 @@ themeButtons.forEach((btn) => {
     }
     updateThemeButtons();
   });
+});
+
+// The sideways slide between Projects and Experience is plain CSS (see "Page-to-page slide" in
+// style.css). Two cases should not play it: a link to the page you are already on (it would slide
+// the same page past itself), and when motion is switched off, which nav.js shows as
+// `nav-still` (that also covers a system that asks for reduced motion). Otherwise this also says
+// whether the name stays still (see the end of "Page-to-page slide" in style.css).
+window.addEventListener("pageswap", (event) => {
+  if (!event.viewTransition) return;
+  try {
+    const pageOf = (url) => (/\/experience(\.html)?$/.test(new URL(url).pathname) ? "experience" : "projects");
+    const samePage = event.activation && pageOf(event.activation.entry.url) === pageOf(location.href);
+    if (samePage || document.documentElement.classList.contains("nav-still")) {
+      event.viewTransition.skipTransition();
+      return;
+    }
+    // The name stays still while the rest slides, but only from the top of the page: scrolled down it
+    // is not on screen, and a name that flies in from above would be worse than one that slides.
+    // Both pages need to agree: this one gets the class now, before its picture is taken, and the
+    // next one finds the note in its head script (a transition's types are not passed on). The note
+    // also tells it a slide is coming, so it can finish its scripts before its first paint.
+    const atTop = window.scrollY <= 2;
+    let noted = false;
+    try {
+      sessionStorage.setItem("slide-note", `${Date.now()}:${atTop ? "hero" : "plain"}`);
+      noted = true;
+    } catch {
+      // storage blocked: the next page can't be told, so the hero just slides with the page
+    }
+    document.documentElement.classList.toggle("slide-hero", atTop && noted);
+  } catch {
+    // an odd URL or a missing API: let the browser do what it would have done
+  }
 });

@@ -38,6 +38,30 @@
         lang = nav.indexOf("es") === 0 ? "es" : "en";
       }
       document.documentElement.setAttribute("lang", lang);
+
+      // The clock for the hero's orbit rings (see hero.css): they turn on it, so the next page's
+      // rings carry on from where this page's were. 4620 s is the common multiple of their periods.
+      document.documentElement.style.setProperty("--orbit-t", String((Date.now() / 1000) % 4620));
+
+      // The page we came from leaves a note (main.js) when it is sliding to this one. Read it here,
+      // before the first paint: the name stays still if the note says so (see the end of "Page-to-page
+      // slide" in style.css), and the first paint waits for the page's scripts (the marker at the end
+      // of the body is after them). Without that the slide would start from the bare markup: hanging
+      // tags straight, nothing highlighted, until the scripts ran a moment later. Only for a slide, so
+      // a normal visit isn't held back at all. (Browsers that don't know "expect" just skip the wait.)
+      try {
+        var note = (sessionStorage.getItem("slide-note") || "").split(":");
+        sessionStorage.removeItem("slide-note");
+        if (note[0] && Date.now() - Number(note[0]) < 5000) {
+          document.documentElement.classList.add("slide-in");
+          if (note[1] === "hero") document.documentElement.classList.add("slide-hero");
+          var wait = document.createElement("link");
+          wait.rel = "expect";
+          wait.href = "#page-end";
+          wait.setAttribute("blocking", "render");
+          document.head.appendChild(wait);
+        }
+      } catch (e) {}
     })();
   </script>
   <script data-goatcounter="https://albertobaraza.goatcounter.com/count"
@@ -252,5 +276,6 @@
   <script src="js/main.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/home.js"></script>
+  <span id="page-end" hidden></span>
 </body>
 </html>

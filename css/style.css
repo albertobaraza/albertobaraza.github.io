@@ -255,6 +255,7 @@ body {
    the hanging toggles, at their right edge (the same frame as the nav), so it reads as theirs. */
 .motion-toggle {
   position: fixed;
+  pointer-events: auto; /* it lives inside the nav, which takes no clicks itself */
   top: 6rem;
   right: max(1.5rem, calc((100vw - 1500px) / 2));
   z-index: 15;
@@ -1146,4 +1147,145 @@ main {
   html {
     scroll-behavior: auto;
   }
+}
+
+/* Page-to-page slide. Projects and Experience are two halves of one canvas: Projects on the left,
+   Experience on the right, as in the menu. Following a link between them shifts the whole canvas
+   sideways instead of cutting. This is the browser's cross-document View Transition: both pages
+   opt in here, the browser keeps a picture of the old page, and the slide runs on pictures, so no
+   script is needed to move anything. Browsers without it just navigate as before. The direction
+   comes from the page being arrived on: arriving on Projects the canvas moves right, arriving on
+   Experience it moves left (Projects is the only page with body.home). main.js skips the slide
+   for a link to the page you are already on and when motion is switched off. */
+@view-transition {
+  navigation: auto;
+}
+
+/* How long the slide takes. One place: the fade of the note and the lede follows it (below), and
+   nav.js reads it for the wind the slide blows through the hanging tags. */
+:root {
+  --slide-time: 0.8s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* The hanging controls (and the motion switch, which nav.js puts inside the nav) are not part of
+   the canvas: they stay where they are (still swinging, the new page picks their motion up) while
+   the page slides behind them. Only the new page's copy is shown, live, so there is no second set
+   of tags fading out. */
+/* The picture the browser takes of a named element is cut to its box, and the nav's own box is 0
+   tall (everything hangs out of it), so the whole hanging area would be cut away. It gets a box
+   as tall as the rope layer. Nothing else changes: the nav takes no clicks itself and its
+   children are top-aligned. */
+.nav {
+  view-transition-name: site-nav;
+  height: 320px;
+}
+
+::view-transition-group(site-nav),
+::view-transition-new(site-nav) {
+  animation: none;
+}
+
+::view-transition-old(site-nav) {
+  display: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--slide-time);
+  animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+  animation-fill-mode: both;
+  mix-blend-mode: normal; /* the default blends the two pictures; this is a slide, not a fade */
+}
+
+html:has(body.home)::view-transition-old(root) {
+  animation-name: canvas-out-right;
+}
+
+html:has(body.home)::view-transition-new(root) {
+  animation-name: canvas-in-from-left;
+}
+
+html:not(:has(body.home))::view-transition-old(root) {
+  animation-name: canvas-out-left;
+}
+
+html:not(:has(body.home))::view-transition-new(root) {
+  animation-name: canvas-in-from-right;
+}
+
+@keyframes canvas-out-left {
+  to { transform: translateX(-100%); }
+}
+
+@keyframes canvas-out-right {
+  to { transform: translateX(100%); }
+}
+
+@keyframes canvas-in-from-left {
+  from { transform: translateX(-100%); }
+}
+
+@keyframes canvas-in-from-right {
+  from { transform: translateX(100%); }
+}
+
+/* The hero stays still. From the top of the page only what is below the hero slides; inside it the
+   name, its rings and the pictures, the buttons and the glow behind them stay exactly where they
+   are, and the note and the lede (the greeting on Projects, the role on Experience) fade into the
+   other page's instead of sliding. Each of those is a named layer, drawn by both pages with the
+   same styles (hero.css) in the same place: the old and the new picture of the stage, the buttons
+   and the glow are the same picture, so the browser's default cross-fade between them cannot be
+   seen, and the note and lede, which are different, are the part that visibly fades. main.js decides
+   when: only when the page is at the top (scrolled down, the hero is not on screen, and it would fly
+   in). It puts the class on the old page, and leaves a note that the head script of the new page
+   turns into the same class. */
+html.slide-hero .hero__deco {
+  view-transition-name: site-glow;
+}
+
+html.slide-hero .hero__stage {
+  view-transition-name: site-hero;
+}
+
+html.slide-hero .hero__text {
+  view-transition-name: site-text;
+}
+
+html.slide-hero .hero__links {
+  view-transition-name: site-links;
+}
+
+/* The stage and the buttons are the same picture on both pages, so there is nothing to fade between:
+   only the new page's, live and at full strength. (The default cross-fade dims them for a frame at
+   the start.) If the other page somehow has no such layer, the old one just goes at once. */
+::view-transition-old(site-hero),
+::view-transition-old(site-links) {
+  display: none;
+}
+
+::view-transition-new(site-hero),
+::view-transition-new(site-links) {
+  animation: none;
+}
+
+/* The note and the lede change, so they get a calm fade, a little shorter than the slide */
+::view-transition-group(site-text),
+::view-transition-old(site-text),
+::view-transition-new(site-text) {
+  animation-duration: calc(var(--slide-time) * 0.7);
+  animation-timing-function: ease;
+}
+
+/* The new page arrives finished: nothing of the hero fades or rises in while it slides in (that is
+   for when the page is opened on its own). Scrolling later reveals the rest as usual. */
+html:active-view-transition .hero .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
 }

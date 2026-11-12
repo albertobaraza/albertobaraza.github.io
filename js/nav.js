@@ -28,6 +28,7 @@
   const ITERATIONS = 8; // constraint passes per substep
   const WIND = 0.0009; // sideways acceleration per px/frame of scroll speed
   const MAX_SCROLL_SPEED = 60; // px/frame, caps the wind
+  const SLIDE_WIND = 30; // the push at the fastest moment of a page slide, as the px/frame of scroll speed it stands in for
   const TILT_DEADZONE = 0.07; // rad (about 4 degrees): a hand is never level, and level lets the ropes sleep
   const MAX_TILT = 0.52; // rad (30 degrees): the furthest the ropes lean, so the toggles at the edges don't swing off the screen
   const TILT_SMOOTHING = 0.2; // share of the remaining way to the new lean covered each frame
@@ -60,6 +61,9 @@
   let pendingScroll = 0;
   let lastScrollY = window.scrollY;
   let smoothScroll = 0;
+  let slideDir = 0; // a page slide is blowing the tags: -1 to the left, 1 to the right, 0 none
+  let slideStart = 0;
+  let slideMs = 800;
   let firstBuild = true;
 
   // Whether the controls may move at all. The system's "reduce motion" setting always wins; apart
@@ -326,7 +330,15 @@
     smoothScroll += (pendingScroll - smoothScroll) * 0.3;
     pendingScroll = 0;
     if (Math.abs(smoothScroll) < 0.02) smoothScroll = 0;
-    const wind = clamp(smoothScroll, -MAX_SCROLL_SPEED, MAX_SCROLL_SPEED) * WIND;
+    // A page slide blows as hard as the canvas moves: nothing at the start, most in the middle, and
+    // nothing again when it has arrived
+    let slideWind = 0;
+    if (slideDir) {
+      const t = (now - slideStart) / slideMs;
+      if (t >= 1) slideDir = 0;
+      else slideWind = slideDir * SLIDE_WIND * Math.sin(Math.PI * t) ** 2;
+    }
+    const wind = clamp(smoothScroll + slideWind, -MAX_SCROLL_SPEED, MAX_SCROLL_SPEED) * WIND;
     if (wind !== 0) items.forEach(wake);
 
     accumulator += dt;
@@ -335,7 +347,7 @@
       for (const item of items) if (!item.asleep) simulate(item, wind * item.gain);
     }
 
-    let active = wind !== 0;
+    let active = wind !== 0 || slideDir !== 0;
     for (const item of items) {
       if (!item.asleep) {
         render(item);
@@ -698,7 +710,9 @@
     });
     document.addEventListener("langchange", describe);
     describe();
-    document.body.appendChild(toggle);
+    // Inside the nav, not at the end of the body: the page-to-page slide (style.css) keeps the nav
+    // where it is and slides the rest, so a switch left outside it would be carried off with the page
+    nav.appendChild(toggle);
   };
 
   window.addEventListener(
@@ -730,4 +744,31 @@
   document.documentElement.classList.toggle("nav-still", isStill());
   if (!reducedMotion) makeSwitch();
   build();
+
+  // Arriving on a page slide (the head script found the note the last page left): the canvas is
+  // moving sideways, so the hanging tags catch some of the wind, in the direction it moves: arriving
+  // on Projects the canvas moves right, arriving on Experience it moves left. It starts when the
+  // slide does and lasts as long as it (--slide-time in style.css).
+  const root = document.documentElement;
+  if (root.classList.contains("slide-in")) {
+    root.classList.remove("slide-in");
+    const dir = document.body.classList.contains("home") ? 1 : -1;
+    slideMs = (parseFloat(getComputedStyle(root).getPropertyValue("--slide-time")) || 0.8) * 1000;
+    let blown = false;
+    const blow = () => {
+      if (blown || isStill()) return;
+      blown = true;
+      slideDir = dir;
+      slideStart = performance.now();
+      items.forEach(wake);
+      ensureLoop();
+    };
+    // with the transition's own start when there is one; the timer is for a browser that painted
+    // the page before this script ran (then the event is already gone)
+    window.addEventListener("pagereveal", (e) => {
+      if (e.viewTransition) e.viewTransition.ready.then(blow, blow);
+      else blow();
+    }, { once: true });
+    setTimeout(blow, 150);
+  }
 })();
