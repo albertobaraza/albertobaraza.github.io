@@ -46,6 +46,14 @@ const renderDates = () => {
 document.addEventListener("langchange", renderDates);
 
 // ---------------------------------------------------------------------------
+// The profile pictures above the name. One that is missing (or fails to load) is simply left out, so
+// the other still shows on its own, never a broken-image icon.
+document.querySelectorAll(".hero__avatar").forEach((img) => {
+  const leaveOut = () => { img.hidden = true; };
+  if (img.complete && img.naturalWidth === 0) leaveOut();
+  else img.addEventListener("error", leaveOut, { once: true });
+});
+
 // Flow: one path through the hero pin, every station icon and the closing pin.
 // It draws itself as you scroll, lights each station when reached, and carries a pulse.
 // Without JS the path simply isn't drawn; the layout stands on its own.

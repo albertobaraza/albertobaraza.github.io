@@ -97,20 +97,30 @@
     <section id="top" class="hero">
       <div class="hero__deco" aria-hidden="true">
         <div class="hero__glow"></div>
-        <div class="hero__orbit"><i></i><i></i><i></i></div>
       </div>
 
-      <div class="hero__hello reveal" style="--i:0">
-        <p class="hero__note" data-i18n="hero-hi">Hello there!</p>
+      <!-- The name hangs in the middle of the orbit rings; the greeting sits on the bio, so it reads as being said by Alberto -->
+      <div class="hero__stage">
+        <div class="hero__orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+        <!-- This page is the merge of the GitHub and LinkedIn profiles, so both pictures sit together above the name -->
+        <div class="hero__avatars" aria-hidden="true">
+          <img class="hero__avatar hero__avatar--github" src="assets/profile/github.webp" alt="" width="256" height="256" decoding="async">
+          <img class="hero__avatar hero__avatar--linkedin" src="assets/profile/linkedin.webp" alt="" width="256" height="256" decoding="async">
+        </div>
+        <h1 class="hero__name"><span class="hero__first reveal" style="--i:0">Alberto</span> <span class="hero__last reveal" style="--i:1">Baraza</span></h1>
       </div>
 
-      <h1 class="hero__name"><span class="hero__first reveal" style="--i:1">Alberto</span> <span class="hero__last reveal" style="--i:2">Baraza</span></h1>
-      <p class="hero__lede reveal" style="--i:4" data-i18n="hero-lede">
-        I spend my days wrangling data for a living, and my evenings building random stuff.
-      </p>
-      <div class="hero__links reveal" style="--i:5">
+      <div class="hero__intro">
+        <div class="hero__hello reveal" style="--i:2">
+          <p class="hero__note" data-i18n="hero-hi">Hello there!</p>
+        </div>
+        <p class="hero__lede reveal" style="--i:3" data-i18n="hero-lede">
+          I spend my days wrangling data for a living, and my evenings building random stuff.
+        </p>
+        <div class="hero__links reveal" style="--i:4">
         <a href="https://github.com/albertobaraza" target="_blank" rel="noopener" class="btn">GitHub <span class="btn__arrow" aria-hidden="true">↗</span></a>
         <a href="https://www.linkedin.com/in/alberto-baraza-barnes" target="_blank" rel="noopener" class="btn">LinkedIn <span class="btn__arrow" aria-hidden="true">↗</span></a>
+        </div>
       </div>
 
       <span class="flow-pin hero__pin" aria-hidden="true"></span>
