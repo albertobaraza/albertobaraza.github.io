@@ -339,12 +339,23 @@
   pointer-events: none;
 }
 
-/* Too narrow for the two side by side: the name, with its pictures and rings, hugs the right edge,
-   and the intro stays on the left below it. */
+/* Too narrow for the two side by side: the name, with its pictures and rings, is centered (it
+   takes the width anyway, so hugging one edge only looked odd) and bigger, to fill the width it
+   has all to itself, and the intro stays on the left below it. The stage gets more room around the
+   name for the rings, which are wider than the name: there is no neighbour to bump into here. */
 @media (max-width: 720px) {
+  :root {
+    --avatar: max(4.25rem, min(19vw, 7.5rem));
+  }
+
+  .hero--split {
+    --stage-size: clamp(3.2rem, 17vw, 7.5rem);
+  }
+
   .hero__stage {
-    justify-self: end;
-    justify-items: end;
+    justify-self: center;
+    justify-items: center;
+    --bleed: min(0.4em, 3rem);
   }
 }
 
