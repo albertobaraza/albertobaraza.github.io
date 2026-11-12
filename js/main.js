@@ -4,6 +4,37 @@
 // across classic scripts, so don't redeclare it there).
 document.getElementById("year").textContent = new Date().getFullYear();
 
+// Visit counter in the footer. GoatCounter, which these pages already report to, can hand its own
+// total back, but only once "allow using the visitor counter" is switched on in its dashboard.
+// Until then (it answers 403), and whenever the request is blocked or fails, nothing is shown at
+// all, never an empty label. The address comes from the tracker's own script tag.
+const visitCountEl = document.getElementById("visit-count");
+const goatCounterScript = document.querySelector("script[data-goatcounter]");
+
+if (visitCountEl && goatCounterScript) {
+  let visits = null;
+  const showVisits = () => {
+    if (visits === null) return;
+    const text = window.i18n.t(visits === 1 ? "footer-visit" : "footer-visits");
+    visitCountEl.textContent = text.replace("{n}", visits.toLocaleString(window.i18n.getLang()));
+    visitCountEl.hidden = false;
+  };
+
+  fetch(goatCounterScript.dataset.goatcounter.replace(/\/count$/, "/counter/TOTAL.json"), { credentials: "omit" })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((data) => {
+      // Unique visitors if it says so, else the plain count. It arrives formatted ("1 234"), so keep the digits.
+      const n = data ? parseInt(String(data.count_unique ?? data.count).replace(/\D/g, ""), 10) : NaN;
+      if (Number.isFinite(n) && n >= 1) {
+        visits = n;
+        showVisits();
+      }
+    })
+    .catch(() => { /* blocked or offline: no counter */ });
+
+  document.addEventListener("langchange", showVisits);
+}
+
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Scroll-reveal animations. `observeReveal` is also used by home.js for elements it

@@ -122,6 +122,8 @@ const translations = {
     "stack-hint": "Click a tool to see where I've used it.",
 
     "footer-cta": "Let's get to work.",
+    "footer-visit": "{n} visit",
+    "footer-visits": "{n} visits",
 
     "theme-light": "Light theme",
     "theme-dark": "Dark theme",
@@ -249,6 +251,8 @@ const translations = {
     "stack-hint": "Haz clic en una herramienta para ver dónde la he usado.",
 
     "footer-cta": "Manos a la obra.",
+    "footer-visit": "{n} visita",
+    "footer-visits": "{n} visitas",
 
     "theme-light": "Tema claro",
     "theme-dark": "Tema oscuro",

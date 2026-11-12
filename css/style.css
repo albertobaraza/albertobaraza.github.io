@@ -815,6 +815,16 @@ main {
   margin: 0;
 }
 
+/* The visit counter, very small, under the copyright line. That line keeps the footer's 1rem
+   bottom margin (so nothing changes while the counter is hidden); pulling the counter up by 0.7rem
+   collapses the two margins to the 0.3rem that is wanted between them. */
+.footer .footer__count {
+  margin: -0.7rem 0 0;
+  font-size: 0.7rem;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Responsive */
 
 @media (max-width: 600px) {
