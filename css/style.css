@@ -78,7 +78,10 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   height: 0;
-  padding: 0 1.5rem;
+  /* On a wide window the nav lives in a centered 1500px frame, so the toggles hang a little in
+     from the edge instead of in the corner (the page tags are centered either way). Narrower
+     windows keep the plain 1.5rem. */
+  padding: 0 max(1.5rem, calc((100vw - 1500px) / 2));
   pointer-events: none; /* only the hanging controls take pointer events */
 }
 
