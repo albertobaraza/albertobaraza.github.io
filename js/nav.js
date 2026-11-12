@@ -418,7 +418,17 @@
     },
     { passive: true }
   );
-  window.addEventListener("resize", rebuild);
+  // Phones fire `resize` whenever the address bar slides in or out, which happens while scrolling
+  // (most of all when scrolling up). Only the height changes then, and nothing here depends on
+  // the height, but a rebuild throws the whole simulation away and snaps every swinging control
+  // back to hanging straight. So only a change of width (rotating the phone, resizing a window)
+  // re-measures the ropes.
+  let builtWidth = window.innerWidth;
+  window.addEventListener("resize", () => {
+    if (window.innerWidth === builtWidth) return;
+    builtWidth = window.innerWidth;
+    rebuild();
+  });
   window.addEventListener("load", rebuild);
   document.addEventListener("langchange", rebuild);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild);
