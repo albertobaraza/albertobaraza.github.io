@@ -224,7 +224,7 @@
   color: var(--text);
   font-size: 0.95rem;
   font-weight: 600;
-  transition: rotate 0.25s ease, translate 0.25s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: rotate 0.25s ease, translate 0.25s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease, scale var(--press-time, 0.4s) var(--spring);
 }
 
 .btn:nth-child(odd) {
@@ -244,6 +244,11 @@
   border-color: var(--accent);
   color: var(--btn-primary-text);
   text-decoration: none;
+}
+
+.btn:active {
+  scale: var(--press);
+  --press-time: 0.09s; /* dips quickly, springs back slowly */
 }
 
 .btn__arrow {
@@ -629,6 +634,13 @@
   rotate: 0deg;
 }
 
+/* Pressed: the icon squashes in and springs back out (it only gets the quick timing on the way in) */
+.station:active .station__icon {
+  scale: var(--press-icon);
+  rotate: 0deg;
+  transition: scale 0.1s ease-out, rotate 0.1s ease-out;
+}
+
 /* Version (apps) or license (repos), pinned to the icon */
 .station__badge {
   position: absolute;
@@ -815,6 +827,7 @@
   }
 
   .station__icon,
+  .station:active .station__icon,
   .station__icon > img,
   .station__thumb,
   .station__icon::before,

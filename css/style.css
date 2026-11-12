@@ -14,6 +14,10 @@
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  /* Tap feedback: how far a pressed control dips, and the springy curve it returns on */
+  --press: 0.94;
+  --press-icon: 0.86;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @font-face {
@@ -31,6 +35,9 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  /* Phones paint a hard-edged box over whatever is tapped. Off everywhere (the property is
+     inherited); a pressed control answers with its own :active style instead. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -194,6 +201,14 @@ body {
   text-decoration: none;
 }
 
+/* Pressed: the tag takes the colours of the current page. No scale here, because nav.js owns the
+   tag's transform and a finger pressing it is usually about to drag it. */
+.nav-tag:active {
+  color: var(--text);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-elevated));
+}
+
 .nav-tag[aria-current="page"] {
   color: var(--text);
   border-color: var(--accent);
@@ -250,6 +265,13 @@ body {
 
 .theme-toggle__btn:hover,
 .lang-toggle__btn:hover {
+  color: var(--text);
+}
+
+/* Pressed: a wash of the accent. Before .is-active so the selected segment stays solid. */
+.theme-toggle__btn:active,
+.lang-toggle__btn:active {
+  background-color: color-mix(in srgb, var(--accent) 35%, transparent);
   color: var(--text);
 }
 
@@ -341,13 +363,18 @@ main {
   white-space: nowrap;
   cursor: pointer;
   appearance: none;
-  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, scale var(--press-time, 0.4s) var(--spring);
 }
 
 .pipeline__node:hover {
   border-color: var(--accent);
   color: var(--text);
   transform: translateY(-1px);
+}
+
+.pipeline__node:active {
+  scale: var(--press);
+  --press-time: 0.09s; /* dips quickly, springs back slowly */
 }
 
 .pipeline__link {
@@ -581,10 +608,17 @@ main {
   font-size: 0.85rem;
   cursor: pointer;
   appearance: none;
+  transition: color 0.15s ease, scale var(--press-time, 0.4s) var(--spring);
 }
 
 .timeline__toggle:hover {
   color: var(--accent-ink);
+}
+
+.timeline__toggle:active {
+  color: var(--accent-ink);
+  scale: var(--press);
+  --press-time: 0.09s;
 }
 
 .timeline__chevron {
@@ -665,12 +699,17 @@ main {
   background: var(--bg-elevated);
   cursor: pointer;
   appearance: none;
-  transition: border-color 0.15s ease, color 0.15s ease, opacity 0.25s ease, transform 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, opacity 0.25s ease, transform 0.15s ease, scale var(--press-time, 0.4s) var(--spring);
 }
 
 .chip:hover {
   border-color: var(--accent);
   color: var(--text);
+}
+
+.chip:active {
+  scale: var(--press);
+  --press-time: 0.09s;
 }
 
 .chip.is-active {
@@ -712,6 +751,17 @@ main {
   gap: 1.5rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
+}
+
+/* Plain text links just fade while pressed */
+.footer__links a,
+.timeline__org a {
+  transition: opacity 0.15s ease;
+}
+
+.footer__links a:active,
+.timeline__org a:active {
+  opacity: 0.55;
 }
 
 .footer__copy {
@@ -890,6 +940,12 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* A pressed control still changes colour, but doesn't dip */
+  :root {
+    --press: 1;
+    --press-icon: 1;
+  }
+
   .reveal {
     transition: none;
     opacity: 1;
