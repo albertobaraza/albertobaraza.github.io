@@ -512,13 +512,12 @@
 }
 
 .station__langs-title {
-  margin: 0 0 0.3rem 0.1rem;
-  font-family: var(--font-hand);
-  font-size: 1.25rem;
-  line-height: 1;
+  margin: 0 0 0.35rem 0.1rem;
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
   color: color-mix(in srgb, var(--node-color) 70%, var(--text));
-  rotate: -2deg;
-  transform-origin: left center;
 }
 
 .station__langs-list {
