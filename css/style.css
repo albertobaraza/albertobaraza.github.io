@@ -1276,6 +1276,109 @@ html.slide-hero .hero__links {
   animation: none;
 }
 
+/* The two profile pictures keep their sides (GitHub left, LinkedIn right) and only change who is in
+   front: the one that leads grows and comes over the other, the other shrinks and tucks behind it
+   (hero.css has the two states). Each is a named layer of its own (a named element's own named
+   children are not part of its picture). The browser makes the straight move between the two boxes
+   (size and place of each); on top of that the pair eases a little apart and back together (the
+   image pair, which fills the box), so that at the half way point, where the stacking order flips
+   (the box's own z-index), they do not overlap and the flip cannot be seen. Everything stays on
+   the same centre line: the movement is horizontal. Arriving on Projects the GitHub picture
+   comes to the front, arriving on Experience the LinkedIn one does. */
+html.slide-hero .hero__avatar--github {
+  view-transition-name: site-avatar-github;
+}
+
+html.slide-hero .hero__avatar--linkedin {
+  view-transition-name: site-avatar-linkedin;
+}
+
+::view-transition-old(site-avatar-github),
+::view-transition-old(site-avatar-linkedin) {
+  display: none;
+}
+
+::view-transition-new(site-avatar-github),
+::view-transition-new(site-avatar-linkedin) {
+  animation: none;
+}
+
+::view-transition-group(site-avatar-github),
+::view-transition-group(site-avatar-linkedin),
+::view-transition-image-pair(site-avatar-github),
+::view-transition-image-pair(site-avatar-linkedin) {
+  animation-duration: var(--slide-time);
+  animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+/* arriving on Projects: GitHub comes to the front, LinkedIn tucks behind it */
+html:has(body.home)::view-transition-group(site-avatar-github) {
+  animation-name: -ua-view-transition-group-anim-site-avatar-github, avatar-order-to-front;
+}
+
+html:has(body.home)::view-transition-image-pair(site-avatar-github) {
+  animation-name: avatar-github-to-front;
+}
+
+html:has(body.home)::view-transition-group(site-avatar-linkedin) {
+  animation-name: -ua-view-transition-group-anim-site-avatar-linkedin, avatar-order-to-back;
+}
+
+html:has(body.home)::view-transition-image-pair(site-avatar-linkedin) {
+  animation-name: avatar-linkedin-to-back;
+}
+
+/* arriving on Experience: LinkedIn comes to the front, GitHub tucks behind it */
+html:not(:has(body.home))::view-transition-group(site-avatar-linkedin) {
+  animation-name: -ua-view-transition-group-anim-site-avatar-linkedin, avatar-order-to-front;
+}
+
+html:not(:has(body.home))::view-transition-image-pair(site-avatar-linkedin) {
+  animation-name: avatar-linkedin-to-front;
+}
+
+html:not(:has(body.home))::view-transition-group(site-avatar-github) {
+  animation-name: -ua-view-transition-group-anim-site-avatar-github, avatar-order-to-back;
+}
+
+html:not(:has(body.home))::view-transition-image-pair(site-avatar-github) {
+  animation-name: avatar-github-to-back;
+}
+
+/* half way: GitHub (left) a little further left, LinkedIn (right) a little further right, the one
+   coming forward a touch bigger and the one going back a touch smaller */
+@keyframes avatar-github-to-front {
+  50% { translate: calc(var(--avatar) * -0.12) 0; scale: 1.06; }
+}
+
+@keyframes avatar-github-to-back {
+  50% { translate: calc(var(--avatar) * -0.12) 0; scale: 0.94; }
+}
+
+@keyframes avatar-linkedin-to-front {
+  50% { translate: calc(var(--avatar) * 0.12) 0; scale: 1.06; }
+}
+
+@keyframes avatar-linkedin-to-back {
+  50% { translate: calc(var(--avatar) * 0.12) 0; scale: 0.94; }
+}
+
+@keyframes avatar-order-to-front {
+  0%, 49.9% { z-index: 1; }
+  50%, 100% { z-index: 2; }
+}
+
+@keyframes avatar-order-to-back {
+  0%, 49.9% { z-index: 2; }
+  50%, 100% { z-index: 1; }
+}
+
+/* The pictures reach up toward the nav on a phone: the nav stays on top of them */
+::view-transition-group(site-nav) {
+  z-index: 10;
+}
+
 /* The note and the lede change, so they get a calm fade, a little shorter than the slide */
 ::view-transition-group(site-text),
 ::view-transition-old(site-text),

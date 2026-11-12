@@ -135,22 +135,31 @@
 }
 
 /* The two profile pictures, overlapping like two circles that merge, just above the name */
+/* The size of the lead profile picture: its own size, not the name's, so making the name smaller
+   doesn't shrink the faces; never too small to read as a face. On :root because the page slide
+   (style.css) uses it for the pictures' movement, and its pieces can only see what :root has. */
+:root {
+  --avatar: max(4rem, min(11.1vw, 7.5rem));
+}
+
+/* The two profile pictures like two spheres side by side: GitHub always on the left and LinkedIn
+   always on the right, on a shared centre line. The lead one is big and in front, the other smaller
+   and tucked behind it, so which one leads is only a matter of size and overlap. Projects leads
+   with the GitHub picture and Experience with the LinkedIn one (the lead one is marked .is-lead);
+   in the page slide they ease apart and back together with the other one in front (style.css). The
+   row is as tall as the lead picture, so what is below it does not depend on which one leads. */
 .hero__avatars {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
+  width: calc(var(--avatar) * 1.56);
+  height: var(--avatar);
   /* centered above the name, whichever side of the page the name is on */
   justify-self: center;
   margin-bottom: 0.1em;
-  /* its own size, not the name's, so making the name smaller doesn't shrink the faces; never too
-     small to read as a face */
-  --avatar: max(3.5rem, min(9.66vw, 6.51rem));
 }
 
 .hero__avatar {
-  width: var(--avatar);
-  height: var(--avatar);
+  position: absolute;
   border-radius: 50%;
   object-fit: cover;
   background: var(--bg-elevated);
@@ -161,13 +170,28 @@
 }
 
 .hero__avatar--github {
+  left: 0;
   rotate: -6deg;
 }
 
-/* in front of the first, just touching it */
 .hero__avatar--linkedin {
-  margin-left: calc(var(--avatar) * -0.12);
+  right: 0;
   rotate: 5deg;
+}
+
+.hero__avatar.is-lead {
+  z-index: 2;
+  top: 0;
+  width: var(--avatar);
+  height: var(--avatar);
+}
+
+/* 0.72 of the lead's size, so 0.14 of it lower to share its centre line */
+.hero__avatar:not(.is-lead) {
+  z-index: 1;
+  top: calc(var(--avatar) * 0.14);
+  width: calc(var(--avatar) * 0.72);
+  height: calc(var(--avatar) * 0.72);
 }
 
 .hero--split .hero__name {
