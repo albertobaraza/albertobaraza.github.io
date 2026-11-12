@@ -447,9 +447,84 @@
     });
   };
 
+  // ------------------------------------------------------------------ keeping the motion going
+
+  // Rebuilding makes brand new ropes hanging straight, so the motion of the old ones is carried
+  // over: through a rebuild on the same page (the fonts or images arriving, a language change),
+  // and from one page to the next (the nav is the same on every page, so the tags just keep
+  // swinging when you follow a link). A rope's state is stored as offsets from its resting pose,
+  // so it still fits if the layout moved a little.
+  const STATE_KEY = "nav-ropes-v1";
+  const STATE_MAX_AGE = 5000; // ms. An older state is stale: the page starts fresh, with the arrival sway.
+
+  const snapshot = (item) => ({
+    ropeLength: item.ropeLength,
+    pts: item.pts.map((p, i) => [
+      p.x - item.restPose[i][0],
+      p.y - item.restPose[i][1],
+      p.px - item.restPose[i][0],
+      p.py - item.restPose[i][1],
+    ]),
+    stretch: item.stretch,
+    stretchVel: item.stretchVel,
+    asleep: item.asleep,
+  });
+
+  // Puts a snapshot onto a freshly built rope. Returns false, touching nothing, if it doesn't fit
+  // (a different layout, or data that isn't what we wrote).
+  const restore = (item, snap) => {
+    const fits =
+      snap &&
+      Array.isArray(snap.pts) &&
+      snap.pts.length === item.pts.length &&
+      Math.abs(snap.ropeLength - item.ropeLength) <= 1.5 &&
+      Number.isFinite(snap.stretch) &&
+      Number.isFinite(snap.stretchVel) &&
+      snap.pts.every((p) => Array.isArray(p) && p.length === 4 && p.every(Number.isFinite));
+    if (!fits) return false;
+
+    item.pts.forEach((p, i) => {
+      const [x, y, px, py] = snap.pts[i];
+      p.x = item.restPose[i][0] + x;
+      p.y = item.restPose[i][1] + y;
+      p.px = item.restPose[i][0] + px;
+      p.py = item.restPose[i][1] + py;
+    });
+    item.stretch = clamp(snap.stretch, MIN_STRETCH, 4);
+    item.stretchVel = snap.stretchVel;
+    if (snap.asleep) {
+      item.asleep = true;
+      item.energy = 0;
+      item.needsRender = true;
+    } else {
+      wake(item);
+      ensureLoop();
+    }
+    return true;
+  };
+
+  // Storage can be blocked or full: then the next page simply starts fresh.
+  const loadState = () => {
+    try {
+      const data = JSON.parse(sessionStorage.getItem(STATE_KEY));
+      if (data && Array.isArray(data.items) && Date.now() - data.t <= STATE_MAX_AGE) return data.items;
+    } catch (err) { /* nothing saved, or unreadable */ }
+    return null;
+  };
+
+  const saveState = () => {
+    if (reducedMotion) return;
+    try {
+      sessionStorage.setItem(STATE_KEY, JSON.stringify({ t: Date.now(), items: items.map(snapshot) }));
+    } catch (err) { /* blocked: the next page starts fresh */ }
+  };
+
   // ------------------------------------------------------------------ build
 
   const build = () => {
+    // The motion to carry over: the ropes being replaced, or (on the first build) the previous page's
+    const carried = items.length ? items.map(snapshot) : firstBuild && !reducedMotion ? loadState() : null;
+
     items.forEach((item) => {
       item.el.style.transform = "";
     });
@@ -471,12 +546,16 @@
       items.forEach(renderStatic);
       return;
     }
+    if (carried) items.forEach((item, i) => restore(item, carried[i]));
     items.forEach(render);
 
     if (firstBuild) {
       firstBuild = false;
-      // a little life on arrival: the controls sway gently and settle
-      setTimeout(() => items.forEach((item, i) => kick(item, (i % 2 ? -1 : 1) * (0.5 + 0.2 * (i % 3)))), 350);
+      // A little life on arrival: the controls sway gently and settle. Not when the previous page
+      // handed its motion over: then they just carry on from where they were.
+      if (!carried) {
+        setTimeout(() => items.forEach((item, i) => kick(item, (i % 2 ? -1 : 1) * (0.5 + 0.2 * (i % 3)))), 350);
+      }
     }
   };
 
@@ -511,6 +590,7 @@
     rebuild();
   });
   window.addEventListener("load", rebuild);
+  window.addEventListener("pagehide", saveState); // leaving the page: hand the motion to the next one
   document.addEventListener("langchange", rebuild);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild);
 
