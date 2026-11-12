@@ -412,12 +412,15 @@
   box-shadow: 0 0 8px var(--node-color);
 }
 
-/* A repo's orbit is its language mix: a thin segmented ring (background set by home.js) */
+/* A repo's orbit is its language mix: a segmented ring (background set by home.js). The mask cuts
+   it to a band --ring wide, growing inward from a fixed outer edge so the chart card still opens
+   at the same distance. */
 .station__orbit--langs {
+  --ring: 3.5px;
   inset: -14%;
   border: 0;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring) - 1px), #000 calc(100% - var(--ring)));
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring) - 1px), #000 calc(100% - var(--ring)));
   animation-duration: 50s;
   pointer-events: auto;
 }
