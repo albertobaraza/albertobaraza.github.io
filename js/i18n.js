@@ -10,6 +10,8 @@ const translations = {
 
     "nav-home": "Home",
     "nav-experience": "Experience",
+    "coffee-short": "Buy me a coffee",
+    "coffee-label": "Buy me a coffee (opens in a new tab)",
 
     "hero-hi": "Hello there!",
     "hero-title": "Data Engineer",
@@ -134,6 +136,8 @@ const translations = {
 
     "nav-home": "Inicio",
     "nav-experience": "Experiencia",
+    "coffee-short": "Invítame a un café",
+    "coffee-label": "Invítame a un café (se abre en una pestaña nueva)",
 
     "hero-hi": "¡Hola!",
     "hero-title": "Ingeniero de Datos",

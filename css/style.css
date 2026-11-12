@@ -207,6 +207,38 @@ body {
   box-shadow: var(--tag-shadow);
 }
 
+/* Buy me a coffee. It is only a link out: nothing from that site is loaded into this page. Wide
+   screens hang a tag with the cup and the words in the nav's empty left column, mirroring the
+   toggles on the right; narrow screens hang the cup alone as a third page tag instead (only one of
+   the two is ever shown). The footer has the same link as a pill. */
+.coffee-icon {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--accent-ink);
+}
+
+.nav-coffee {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.hang--coffee {
+  grid-column: 1;
+  justify-self: start;
+  --rope: 54px;
+}
+
+.hang--coffee-compact {
+  display: none; /* narrow screens only, see the media query below */
+}
+
 /* While a control is being dragged with the mouse or a finger */
 .is-dragging-hang,
 .is-dragging-hang * {
@@ -734,6 +766,7 @@ main {
 
 .footer__links {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
@@ -749,6 +782,29 @@ main {
 .footer__links a:active,
 .timeline__org a:active {
   opacity: 0.55;
+}
+
+.footer__links .footer__coffee {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  transition: border-color 0.15s ease, color 0.15s ease, scale var(--press-time, 0.4s) var(--spring);
+}
+
+.footer__links .footer__coffee:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.footer__links .footer__coffee:active {
+  opacity: 1; /* a pill dips instead of fading like the plain links */
+  scale: var(--press);
+  --press-time: 0.09s;
 }
 
 .footer__copy {
@@ -823,6 +879,20 @@ main {
 
   .nav__links .hang:nth-child(1) { --rope: 58px; }
   .nav__links .hang:nth-child(2) { --rope: 70px; }
+  .nav__links .hang:nth-child(3) { --rope: 62px; }
+
+  .hang--coffee {
+    display: none;
+  }
+
+  /* Hangs at the left end of the row (the room beside the language toggle), but stays last in the
+     tab order, after the two pages. */
+  .hang--coffee-compact {
+    display: inline-flex;
+    order: -1;
+    margin-right: 0.6rem; /* on top of the row's gap, so the cup is clearly apart from Home */
+    padding: 0.38rem 0.65rem;
+  }
   .hang--lang { --rope: 22px; }
   .hang--theme { --rope: 34px; }
 
@@ -844,6 +914,10 @@ main {
 
   .nav__links {
     gap: 0.35rem;
+  }
+
+  .hang--coffee-compact {
+    margin-right: 0.4rem;
   }
 
   .nav-tag {
