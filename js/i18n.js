@@ -12,7 +12,7 @@ const translations = {
     "nav-experience": "Experience",
 
     "hero-hi": "Hello there!",
-    "hero-title": "Senior Data Engineer",
+    "hero-title": "Data Engineer",
     "hero-lede": `
         I spend my days wrangling data for a living, and my evenings building random stuff.
       `,
@@ -23,10 +23,8 @@ const translations = {
         I started out studying software engineering, and step by step I've shaped myself into a data engineer.<br>
         Small Bash, SQL, Java, and Python
         scripts first turned into end-to-end workflows, then into entire projects, and now into broader data
-        architectures. I drive technical initiatives on a lean team, helping shape architecture, standards,
+        architectures. I drive technical initiatives, helping shape architecture, standards,
         and the technical roadmap.
-        What ties it together: I like systems
-        that fail loudly, recover cleanly, and don't need constant maintenance.
       `,
 
     "pl-bi": "BI Analyst",
@@ -64,7 +62,7 @@ const translations = {
     "tl-nexmart-aria": "Feb 2024 – Present",
     "tl-nexmart-role": "Senior Data Engineer",
     "tl-nexmart-bullets": `
-              <li>Driving core data engineering initiatives within a lean team, shaping architecture, standards, and the technical roadmap</li>
+              <li>Driving core data engineering initiatives, shaping architecture, standards, and the technical roadmap</li>
               <li>Building a self-healing, idempotent data layer capable of fully rebuilding from scratch, enabling confident deployments and dramatically reducing failure recovery time</li>
               <li>Driving cross-functional collaboration with Data Science, ML Engineering, and IT Platform to evolve the data infrastructure and its standards</li>
               <li>Mentoring the junior data engineer on the team</li>
@@ -138,7 +136,7 @@ const translations = {
     "nav-experience": "Experiencia",
 
     "hero-hi": "¡Hola!",
-    "hero-title": "Ingeniero de Datos Senior",
+    "hero-title": "Ingeniero de Datos",
     "hero-lede": `
         Me paso los días moviendo datos de un lado a otro para ganarme la vida y las noches construyendo cosas al azar.
       `,
@@ -150,10 +148,8 @@ const translations = {
         Los pequeños scripts de Bash,
         SQL, Java y Python, poco a poco se convirtieron en flujos de trabajo completos, luego en
         proyectos enteros y ahora en arquitecturas de datos más amplias. Lidero
-        iniciativas técnicas en un equipo reducido, ayudando a definir la arquitectura, los
+        iniciativas técnicas, ayudando a definir la arquitectura, los
         estándares y la hoja de ruta técnica.
-        ¿El hilo conductor? Me gustan los sistemas
-        que fallan de forma ruidosa, se recuperan limpiamente y no necesitan mantenimiento constante.
       `,
 
     "pl-bi": "Analista BI",
@@ -191,7 +187,7 @@ const translations = {
     "tl-nexmart-aria": "Feb 2024 – Actualidad",
     "tl-nexmart-role": "Ingeniero de Datos Senior",
     "tl-nexmart-bullets": `
-              <li>Lidero iniciativas clave de ingeniería de datos en un equipo reducido, dando forma a la arquitectura, los estándares y la hoja de ruta técnica</li>
+              <li>Lidero iniciativas clave de ingeniería de datos, dando forma a la arquitectura, los estándares y la hoja de ruta técnica</li>
               <li>Construyo una capa de datos autorreparable e idempotente capaz de reconstruirse por completo desde cero, lo que permite despliegues con confianza y reduce drásticamente el tiempo de recuperación ante fallos</li>
               <li>Impulso la colaboración multidisciplinar con Data Science, ML Engineering e IT Platform para evolucionar la infraestructura de datos y sus estándares</li>
               <li>Mentorizo al ingeniero de datos junior del equipo</li>
