@@ -140,7 +140,7 @@ const translations = {
     "hero-hi": "¡Hola!",
     "hero-title": "Ingeniero de Datos Senior",
     "hero-lede": `
-        Me paso los días domando datos para ganarme la vida y las noches construyendo cosas al azar.
+        Me paso los días moviendo datos de un lado a otro para ganarme la vida y las noches construyendo cosas al azar.
       `,
 
     "about-title": "Sobre mí",
