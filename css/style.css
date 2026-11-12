@@ -463,7 +463,9 @@ main {
    viewport width - a long browser-zoom or a wide-but-short window can trigger
    it just as easily as a narrow phone. See updatePipelineLayout in main.js. */
 .pipeline--vertical {
-  flex-direction: column;
+  /* Stacked, the newest role comes first, like the timeline below it. The wide row stays oldest
+     to newest, left to right. (The markup is oldest first, so this only changes how it is drawn.) */
+  flex-direction: column-reverse;
   align-items: center;
   max-width: none;
   overflow-x: visible;
@@ -483,6 +485,7 @@ main {
   margin-top: 0;
   margin-left: -4px;
   animation-name: pipelineBeamVertical;
+  animation-direction: reverse; /* still travels from the oldest role towards the current one, now upwards */
 }
 
 .pipeline-annotation {
