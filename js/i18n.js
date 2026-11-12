@@ -127,7 +127,7 @@ const translations = {
     "motion-pause": "Pause the swinging buttons",
     "motion-play": "Make the buttons swing",
     "footer-visits": "{n} visits",
-    "duck-found": "Quack! Congratulations, you found me!",
+    "duck-found": "You found me!",
 
     "theme-light": "Light theme",
     "theme-dark": "Dark theme",
@@ -260,7 +260,7 @@ const translations = {
     "motion-pause": "Pausar el balanceo de los botones",
     "motion-play": "Activar el balanceo de los botones",
     "footer-visits": "{n} visitas",
-    "duck-found": "¡Cuac! ¡Enhorabuena, me has encontrado!",
+    "duck-found": "¡Me has encontrado!",
 
     "theme-light": "Tema claro",
     "theme-dark": "Tema oscuro",
