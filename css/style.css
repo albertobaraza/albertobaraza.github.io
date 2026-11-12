@@ -138,6 +138,8 @@ body {
   pointer-events: auto;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none; /* no link preview sheet on a long press (iOS) */
+  touch-action: none; /* a finger on a control drags it instead of scrolling the page */
   will-change: transform;
 }
 
@@ -207,7 +209,7 @@ body {
   box-shadow: var(--tag-shadow);
 }
 
-/* While a control is being dragged with the mouse */
+/* While a control is being dragged with the mouse or a finger */
 .is-dragging-hang,
 .is-dragging-hang * {
   cursor: grabbing !important;

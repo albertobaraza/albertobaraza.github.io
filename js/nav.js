@@ -5,10 +5,11 @@
 // Per control: a chain of rope points pinned to the top edge, then a "body" point hanging below
 // the attach point at the tag's eyelet. Verlet integration + distance constraints give a rope
 // that bends and a tag that swings like a pendulum. Scroll speed pushes everything sideways like
-// wind. Hovering a tag only gives it a tiny nudge; the real interaction is grabbing it with the
-// mouse (click and drag) and flinging it. A control that has stopped moving goes to sleep so an
-// idle page costs nothing. Uses `reducedMotion` from main.js: with reduced motion
-// the ropes are drawn once, straight, and nothing moves.
+// wind. Hovering a tag only gives it a tiny nudge; the real interaction is grabbing it (click and
+// drag with the mouse, or press and drag with a finger without lifting it) and flinging it. A
+// control that has stopped moving goes to sleep so an idle page costs nothing. Uses
+// `reducedMotion` from main.js: with reduced motion the ropes are drawn once, straight, and
+// nothing moves.
 (() => {
   const nav = document.querySelector(".nav");
   const svg = nav && nav.querySelector(".nav__ropes");
@@ -26,6 +27,7 @@
   const MAX_SCROLL_SPEED = 60; // px/frame, caps the wind
   const ANCHOR_Y = -12; // ropes start just above the window so they appear to come from outside
   const DRAG_THRESHOLD = 5; // px of mouse travel before a press becomes a drag (and not a click)
+  const TOUCH_DRAG_THRESHOLD = 10; // fingers jitter more than a mouse, so a tap gets more slack
   const HOVER_NUDGE = 0.07; // sideways velocity (px/substep) when the cursor arrives: about a 2° sway
   const HOVER_COOLDOWN = 600; // ms before the same control can be nudged again
 
@@ -270,9 +272,19 @@
       kick(item, away * HOVER_NUDGE);
     });
 
+    // True while a finger or pen is down on this control. A long press on a link would open the
+    // browser's context menu (and cancel the gesture), which would kill a "hold, then drag".
+    let touching = false;
+    el.addEventListener("contextmenu", (e) => {
+      if (touching) e.preventDefault();
+    });
+
     el.addEventListener("pointerdown", (e) => {
       const item = el.hangItem;
-      if (!item || e.pointerType === "touch" || e.button !== 0) return;
+      if (!item || touching || e.button !== 0) return;
+      const isMouse = e.pointerType === "mouse";
+      touching = !isMouse;
+      const threshold = isMouse ? DRAG_THRESHOLD : TOUCH_DRAG_THRESHOLD;
       const press = {
         id: e.pointerId,
         x: e.clientX,
@@ -290,7 +302,7 @@
       const onMove = (ev) => {
         if (ev.pointerId !== press.id) return;
         if (!press.moved) {
-          if (Math.hypot(ev.clientX - press.x, ev.clientY - press.y) < DRAG_THRESHOLD) return;
+          if (Math.hypot(ev.clientX - press.x, ev.clientY - press.y) < threshold) return;
           press.moved = true;
           item.attach.inv = 0; // pinned to the pointer while held
           item.drag = { x: item.attach.x, y: item.attach.y };
@@ -326,7 +338,8 @@
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         window.removeEventListener("pointercancel", onUp);
-        if (!press.moved) return; // a plain click: let it through
+        touching = false;
+        if (!press.moved) return; // a plain click or tap: let it through
 
         // fling: release with the pointer's velocity
         const perSubstep = 1000 / RATE;
