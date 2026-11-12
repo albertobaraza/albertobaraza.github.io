@@ -9,7 +9,8 @@
 // drag with the mouse, or press and drag with a finger without lifting it), flinging it, or
 // pulling it past the rope's length: the rope is elastic, so it stretches against growing
 // resistance and, once released, springs back and bounces. A control that has stopped moving goes
-// to sleep so an idle page costs nothing. Uses `reducedMotion` from main.js: with reduced motion
+// to sleep so an idle page costs nothing. On a phone or tablet, tilting the device tilts "down" for
+// the ropes, so the controls hang along it. Uses `reducedMotion` from main.js: with reduced motion
 // the ropes are drawn once, straight, and nothing moves.
 (() => {
   const nav = document.querySelector(".nav");
@@ -26,6 +27,9 @@
   const ITERATIONS = 8; // constraint passes per substep
   const WIND = 0.0009; // sideways acceleration per px/frame of scroll speed
   const MAX_SCROLL_SPEED = 60; // px/frame, caps the wind
+  const TILT_DEADZONE = 0.07; // rad (about 4 degrees): a hand is never level, and level lets the ropes sleep
+  const MAX_TILT = 0.52; // rad (30 degrees): the furthest the ropes lean, so the toggles at the edges don't swing off the screen
+  const TILT_SMOOTHING = 0.2; // share of the remaining way to the new lean covered each frame
   const ANCHOR_Y = -12; // ropes start just above the window so they appear to come from outside
   const DRAG_THRESHOLD = 5; // px of mouse travel before a press becomes a drag (and not a click)
   const TOUCH_DRAG_THRESHOLD = 10; // fingers jitter more than a mouse, so a tap gets more slack
@@ -56,6 +60,10 @@
   let lastScrollY = window.scrollY;
   let smoothScroll = 0;
   let firstBuild = true;
+  let tilt = 0; // how far "down" leans from straight down on the screen, in radians (positive: to the right)
+  let tiltTarget = 0; // where the sensors say it should be; tilt eases towards it
+  let gravX = 0; // gravity per substep, split along the screen; straight down unless the device is tilted
+  let gravY = GRAVITY;
 
   // Where an element sits at rest, relative to the nav. offset* ignores transforms, so this is
   // correct even while the control is swinging.
@@ -174,8 +182,8 @@
       const vy = (p.y - p.py) * damping;
       p.px = p.x;
       p.py = p.y;
-      p.x += vx + wind * p.wind;
-      p.y += vy + GRAVITY;
+      p.x += vx + wind * p.wind + gravX;
+      p.y += vy + gravY;
     }
 
     if (drag) {
@@ -222,7 +230,7 @@
     let energy = 0;
     for (const p of pts) if (p.inv) energy += Math.abs(p.x - p.px) + Math.abs(p.y - p.py);
     item.energy = energy;
-    item.still = !drag && wind === 0 && item.stretch === 1 && energy < 0.025 * pts.length ? item.still + 1 : 0;
+    item.still = !drag && wind === 0 && item.stretch === 1 && tilt === 0 && energy < 0.025 * pts.length ? item.still + 1 : 0;
     if (item.still > RATE / 2) sleep(item);
   };
 
@@ -296,6 +304,13 @@
     raf = 0;
     const dt = clamp((now - last) / 1000, 0, 0.05);
     last = now;
+
+    if (tilt !== tiltTarget) {
+      tilt += (tiltTarget - tilt) * TILT_SMOOTHING;
+      if (Math.abs(tiltTarget - tilt) < 0.0005) tilt = tiltTarget;
+      gravX = GRAVITY * Math.sin(tilt);
+      gravY = GRAVITY * Math.cos(tilt);
+    }
 
     smoothScroll += (pendingScroll - smoothScroll) * 0.3;
     pendingScroll = 0;
@@ -446,6 +461,57 @@
       window.addEventListener("pointercancel", onUp);
     });
   };
+
+  // ------------------------------------------------------------------ tilting the device
+
+  // The orientation sensors say which way is down. Gravity in the device's own axes comes from beta
+  // and gamma together (either alone is unreliable: held upright, gamma and alpha trade places), and
+  // is then turned into the screen's axes by the screen's rotation. The ropes hang along it, and
+  // tilt is how far it leans from straight down on the screen.
+  const onOrientation = (e) => {
+    if (e.beta == null || e.gamma == null) return; // a device (or a desktop browser) with no sensor
+    const beta = (e.beta * Math.PI) / 180;
+    const gamma = (e.gamma * Math.PI) / 180;
+    const dx = Math.sin(gamma) * Math.cos(beta); // gravity along the device's x (to its right)...
+    const dy = -Math.sin(beta); // ...and along its y (to its top)
+    const angle = (((screen.orientation ? screen.orientation.angle : window.orientation) || 0) % 360 + 360) % 360;
+    let sx;
+    let sy; // gravity on the screen: x to the right, y down
+    if (angle === 90) { sx = -dy; sy = -dx; }
+    else if (angle === 180) { sx = -dx; sy = dy; }
+    else if (angle === 270) { sx = dy; sy = dx; }
+    else { sx = dx; sy = -dy; }
+
+    // A device lying flat has no sideways to speak of, so the lean fades out; a hand never holds it
+    // perfectly level, so a small lean counts as none.
+    let lean = Math.atan2(sx, Math.max(sy, 1e-4)) * clamp(Math.hypot(sx, sy) / 0.3, 0, 1);
+    lean = Math.sign(lean) * Math.max(0, Math.abs(lean) - TILT_DEADZONE);
+    const next = clamp(lean, -MAX_TILT, MAX_TILT);
+
+    if (Math.abs(next - tiltTarget) < 0.004) return; // sensor noise
+    tiltTarget = next;
+    items.forEach(wake);
+    ensureLoop();
+  };
+
+  // Only touch devices (a laptop's sensor would make a desktop page twitch), and not for people who
+  // asked for less motion. Listening costs nothing where there is no permission to be had. iOS (and
+  // any browser that has the call) must be asked, in answer to a tap or drag, so that happens the
+  // first time a hanging control is touched.
+  if (!reducedMotion && "DeviceOrientationEvent" in window && window.matchMedia("(pointer: coarse)").matches) {
+    window.addEventListener("deviceorientation", onOrientation, { passive: true });
+
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      const askForMotion = (e) => {
+        if (e.pointerType !== "touch" || !(e.target instanceof Element) || !e.target.closest(".hang")) return;
+        document.removeEventListener("pointerup", askForMotion, true);
+        try {
+          Promise.resolve(DeviceOrientationEvent.requestPermission()).catch(() => { /* declined: no tilt */ });
+        } catch (err) { /* not allowed right now: no tilt */ }
+      };
+      document.addEventListener("pointerup", askForMotion, true);
+    }
+  }
 
   // ------------------------------------------------------------------ keeping the motion going
 
