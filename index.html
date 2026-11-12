@@ -94,7 +94,7 @@
       <circle class="flow__beam" r="5"/>
     </svg>
 
-    <section id="top" class="hero">
+    <section id="top" class="hero hero--split">
       <div class="hero__deco" aria-hidden="true">
         <div class="hero__glow"></div>
       </div>
@@ -111,12 +111,20 @@
       </div>
 
       <div class="hero__intro">
-        <div class="hero__hello reveal" style="--i:2">
-          <p class="hero__note" data-i18n="hero-hi">Hello there!</p>
+        <div class="hero__text">
+          <div class="hero__hello reveal" style="--i:2">
+            <p class="hero__note" data-i18n="hero-hi">Hello there!</p>
+          </div>
+          <div class="hero__slot">
+            <p class="hero__lede reveal" style="--i:3" data-i18n="hero-lede">
+              I spend my days wrangling data for a living, and my evenings building random stuff.
+            </p>
+            <!-- Invisible: the Experience page's tagline, so this block is as tall as that page's (see .hero__slot) -->
+            <p class="hero__lede hero__lede--ghost" aria-hidden="true" data-i18n="experience-lede">
+              Well-defined workflows and a clear objective. The foundation of a great project.
+            </p>
+          </div>
         </div>
-        <p class="hero__lede reveal" style="--i:3" data-i18n="hero-lede">
-          I spend my days wrangling data for a living, and my evenings building random stuff.
-        </p>
         <div class="hero__links reveal" style="--i:4">
         <a href="https://github.com/albertobaraza" target="_blank" rel="noopener" class="btn">GitHub <span class="btn__arrow" aria-hidden="true">↗</span></a>
         <a href="https://www.linkedin.com/in/alberto-baraza-barnes" target="_blank" rel="noopener" class="btn">LinkedIn <span class="btn__arrow" aria-hidden="true">↗</span></a>

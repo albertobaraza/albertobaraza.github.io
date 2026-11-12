@@ -405,6 +405,18 @@ main {
   border-top: 1px solid var(--border);
 }
 
+/* The Experience page is framed like Projects (a 1100px frame, see .home-main), so its hero, with
+   the name that stays still when the page slides, lines up with the Projects one. Everything after
+   the hero keeps the narrower column it always had: --max-width includes the main's side padding. */
+.experience-main {
+  max-width: 1100px;
+}
+
+.experience-main > .section {
+  max-width: calc(var(--max-width) - 3rem);
+  margin-inline: auto;
+}
+
 .section__title {
   font-size: 0.85rem;
   text-transform: uppercase;

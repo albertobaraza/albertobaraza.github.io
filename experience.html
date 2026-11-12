@@ -78,17 +78,42 @@
     </div>
   </header>
 
-  <main>
-    <section id="top" class="hero hero--page">
+  <main class="experience-main">
+    <section id="top" class="hero hero--split">
       <div class="hero__deco" aria-hidden="true">
         <div class="hero__glow"></div>
       </div>
 
-      <h1 class="hero__name"><span class="hero__first">Alberto</span> <span class="hero__last">Baraza</span></h1>
-      <p class="hero__title" data-i18n="hero-title">Data Engineer</p>
-      <p class="hero__lede" data-i18n="experience-lede">
-        Well-defined workflows and a clear objective. The foundation of a great project.
-      </p>
+      <!-- Exactly the Projects page's name, rings and pictures (same styles, hero.css), so the name stays put when the page slides between the two -->
+      <div class="hero__stage">
+        <div class="hero__orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="hero__avatars" aria-hidden="true">
+          <img class="hero__avatar hero__avatar--github" src="assets/profile/github.webp" alt="" width="256" height="256" decoding="async">
+          <img class="hero__avatar hero__avatar--linkedin" src="assets/profile/linkedin.webp" alt="" width="256" height="256" decoding="async">
+        </div>
+        <h1 class="hero__name"><span class="hero__first">Alberto</span> <span class="hero__last">Baraza</span></h1>
+      </div>
+
+      <div class="hero__intro">
+        <div class="hero__text">
+          <div class="hero__hello">
+            <p class="hero__note" data-i18n="hero-title">Data Engineer</p>
+          </div>
+          <div class="hero__slot">
+            <p class="hero__lede" data-i18n="experience-lede">
+              Well-defined workflows and a clear objective. The foundation of a great project.
+            </p>
+            <!-- Invisible: the Projects page's bio, so this block is as tall as that page's (see .hero__slot) -->
+            <p class="hero__lede hero__lede--ghost" aria-hidden="true" data-i18n="hero-lede">
+              I spend my days wrangling data for a living, and my evenings building random stuff.
+            </p>
+          </div>
+        </div>
+        <div class="hero__links">
+          <a href="https://github.com/albertobaraza" target="_blank" rel="noopener" class="btn">GitHub <span class="btn__arrow" aria-hidden="true">↗</span></a>
+          <a href="https://www.linkedin.com/in/alberto-baraza-barnes" target="_blank" rel="noopener" class="btn">LinkedIn <span class="btn__arrow" aria-hidden="true">↗</span></a>
+        </div>
+      </div>
     </section>
 
     <section id="about" class="section">

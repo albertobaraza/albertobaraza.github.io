@@ -4,6 +4,14 @@
 // across classic scripts, so don't redeclare it there).
 document.getElementById("year").textContent = new Date().getFullYear();
 
+// The profile pictures above the name (both pages' heroes). One that is missing (or fails to load)
+// is simply left out, so the other still shows on its own, never a broken-image icon.
+document.querySelectorAll(".hero__avatar").forEach((img) => {
+  const leaveOut = () => { img.hidden = true; };
+  if (img.complete && img.naturalWidth === 0) leaveOut();
+  else img.addEventListener("error", leaveOut, { once: true });
+});
+
 // Visit counter in the footer. GoatCounter, which these pages already report to, can hand its own
 // total back, but only once "allow using the visitor counter" is switched on in its dashboard.
 // Until then (it answers 403), and whenever the request is blocked or fails, nothing is shown at

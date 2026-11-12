@@ -1,6 +1,8 @@
-/* Shared hero: the big name, the role line and the one-sentence lede. Used by the home page
-   (with extra playful pieces from home.css) and by the Experience page. Every color is derived
-   from the theme tokens. */
+/* Shared hero: the big name with its rings and pictures, and an intro beside it (a handwritten
+   note and a lede). Used by the Projects page (home, with extra playful pieces from home.css) and
+   by the Experience page. Both use the same split layout, so the name sits in exactly the same
+   place on both: that is what lets the page-to-page slide (style.css) keep the name still while
+   the rest of the page slides. Every color is derived from the theme tokens. */
 
 /* Hero */
 
@@ -11,11 +13,6 @@
   --indent: clamp(0rem, 11vw, 9rem);
 }
 
-/* A page hero with no greeting note above the name (Experience) needs a little more air on top */
-.hero--page {
-  padding-top: clamp(3.5rem, 8vw, 5.5rem);
-}
-
 /* The glow of the hero bleeds a little past its bottom edge; make sure the sections that
    follow paint above it instead of being tinted by it. */
 .hero ~ .section {
@@ -24,7 +21,6 @@
 }
 
 .hero__name,
-.hero__title,
 .hero__lede {
   position: relative;
   z-index: 1;
@@ -43,14 +39,17 @@
   overflow: hidden;
   overflow: clip;
   pointer-events: none;
-  /* fade out at the bottom so the glow never ends in a visible edge */
-  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
-  mask-image: linear-gradient(to bottom, #000 62%, transparent);
 }
 
 .hero__glow {
   position: absolute;
   inset: 0;
+  /* Fade out at the bottom so the glow never ends in a visible edge. This mask is on the glow itself
+     and not on the box that clips it: with it on the box, the page slide (style.css) sometimes
+     showed nothing at all for the first half of the slide in Chromium. Same look: the mask is applied
+     after the blur either way, and the glow only drifts a few percent. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
   background:
     radial-gradient(circle at 22% 40%, rgba(251, 191, 36, 0.2), transparent 52%),
     radial-gradient(circle at 80% 60%, rgba(217, 119, 6, 0.15), transparent 50%),
@@ -95,37 +94,6 @@
   padding-bottom: 0.08em;
 }
 
-.hero__title {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  margin: 1.4rem 0 0;
-  font-family: var(--font-mono);
-  font-size: clamp(0.95rem, 2.3vw, 1.15rem);
-  color: var(--text-muted);
-}
-
-.hero__title::before {
-  content: "";
-  flex: none;
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
-.hero__title::after {
-  content: "";
-  flex: none;
-  width: clamp(48px, 12vw, 140px);
-  height: 8px;
-  background: var(--accent);
-  opacity: 0.75;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 8' preserveAspectRatio='none'%3E%3Cpath d='M0 4Q8.75 0 17.5 4T35 4T52.5 4T70 4T87.5 4T105 4T122.5 4T140 4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 8' preserveAspectRatio='none'%3E%3Cpath d='M0 4Q8.75 0 17.5 4T35 4T52.5 4T70 4T87.5 4T105 4T122.5 4T140 4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-}
-
 .hero__lede {
   max-width: 38ch;
   margin: 1.6rem 0 0 var(--indent);
@@ -134,8 +102,302 @@
   color: var(--text-muted);
 }
 
+/* The split hero (Projects and Experience). The name hangs in the middle of the orbit rings, and
+   the intro sits beside it: on Projects the greeting, the bio and the buttons, on Experience the
+   role and the tagline. Wide: the intro on the left and the name with its rings on the right.
+   Narrow: stacked, the name first, then the intro. */
+.hero--split {
+  display: grid;
+  gap: 1.75rem;
+  /* how far the bio and the buttons step in from the greeting's edge */
+  --intro-indent: clamp(0rem, 3vw, 2.5rem);
+}
+
+.hero__stage {
+  position: relative;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  width: fit-content;
+  /* The size of the name (it takes this size, below), so the rings can be sized in em and always wrap it */
+  font-size: clamp(2.6rem, 10vw, 6.75rem);
+  /* The rings spin, and a spinning circle's box swings out to its corners, which would widen the
+     page on narrower windows. Clipping sideways stops that; the padding (taken back by the
+     margin) leaves the rings, which overhang the name a little, room to show in full. */
+  overflow-x: clip;
+  --bleed: min(0.2em, 1.4rem); /* never more than the page's own side padding, or the stage would stick out of it */
+  /* The same room above and below: the rings are a touch taller than the stage, and the page slide
+     takes a picture of the stage cut to its box, which must not cut them. */
+  --bleed-y: 0.1em;
+  padding: var(--bleed-y) var(--bleed);
+  margin: calc(var(--bleed-y) * -1) calc(var(--bleed) * -1);
+  min-height: calc(3.4em + var(--bleed-y) * 2);
+}
+
+/* The two profile pictures, overlapping like two circles that merge, just above the name */
+.hero__avatars {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  /* centered above the name, whichever side of the page the name is on */
+  justify-self: center;
+  margin-bottom: 0.1em;
+  /* its own size, not the name's, so making the name smaller doesn't shrink the faces; never too
+     small to read as a face */
+  --avatar: max(3.5rem, min(9.66vw, 6.51rem));
+}
+
+.hero__avatar {
+  width: var(--avatar);
+  height: var(--avatar);
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg-elevated);
+  border: 3px solid var(--bg);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 12px 22px -12px color-mix(in srgb, #000 55%, transparent);
+}
+
+.hero__avatar--github {
+  rotate: -6deg;
+}
+
+/* in front of the first, just touching it */
+.hero__avatar--linkedin {
+  margin-left: calc(var(--avatar) * -0.12);
+  rotate: 5deg;
+}
+
+.hero--split .hero__name {
+  font-size: 1em; /* the stage's size */
+}
+
+.hero__intro {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* the lede follows straight on from what is above it (the greeting, or the role) */
+.hero--split .hero__lede {
+  margin: 0 0 0 var(--intro-indent);
+}
+
+/* The note and the lede together. In the page slide this is the part of the hero that fades into the
+   other page's: everything else in the hero stays put. A named element is photographed cut to its
+   own box, and the tilted note reaches a little outside its box, so this has room all round (taken
+   back by the negative margin, so nothing moves). It is as wide as the column on both pages, so the
+   two pictures are the same size and nothing has to be stretched. */
+.hero__text {
+  align-self: stretch;
+  padding: 0.6rem 0.75rem;
+  margin: -0.6rem -0.75rem;
+}
+
+/* The lede and, hidden in the same grid cell, the other page's lede: the cell is as tall as the
+   taller of the two, on both pages. Without it a language where one page's lede wraps to a line
+   more than the other's would centre the two intros differently, and the buttons below would sit
+   at different heights on the two pages (they must stay exactly still in the page slide). */
+.hero__slot {
+  display: grid;
+}
+
+.hero__slot > * {
+  grid-area: 1 / 1;
+  align-self: start;
+}
+
+.hero__lede--ghost {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The handwritten note above the lede: "Hello there!" on Projects, the role on Experience. The same
+   markup and the same rules on both, so the one that takes the other's place after the slide is
+   exactly the same size. */
+.hero__hello {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  width: fit-content;
+  margin-bottom: 0.4rem;
+  color: var(--accent-ink);
+  rotate: -4deg;
+}
+
+.hero__note {
+  margin: 0;
+  font-family: var(--font-hand);
+  font-size: clamp(2.3rem, 6.4vw, 3.7rem);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The two buttons under the lede (GitHub, LinkedIn): the same on Projects and Experience, in the
+   same place, so the page-to-page slide keeps them still. */
+.hero__links {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1rem;
+  /* Room all round, for the page slide's picture of this row (see .hero__text): the buttons are
+     tilted and the second sits lower than the row. The negative margin takes it back. */
+  padding: 0.75rem 1rem 1.25rem;
+  margin: calc(1.75rem - 0.75rem) -1rem -1.25rem calc(var(--intro-indent) - 1rem);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--deco-grey) 70%, transparent);
+  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: rotate 0.25s ease, translate 0.25s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease, scale var(--press-time, 0.4s) var(--spring);
+}
+
+.btn:nth-child(odd) {
+  rotate: -2.5deg;
+}
+
+.btn:nth-child(even) {
+  rotate: 2deg;
+  translate: 0 0.4rem;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  rotate: 0deg;
+  translate: 0 -2px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--btn-primary-text);
+  text-decoration: none;
+}
+
+.btn:active {
+  scale: var(--press);
+  --press-time: 0.09s; /* dips quickly, springs back slowly */
+}
+
+.btn__arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.btn:hover .btn__arrow {
+  transform: translate(2px, -2px);
+}
+
+.hero__orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4.1em;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/* Too narrow for the two side by side: the name, with its pictures and rings, hugs the right edge,
+   and the intro stays on the left below it. */
+@media (max-width: 720px) {
+  .hero__stage {
+    justify-self: end;
+    justify-items: end;
+  }
+}
+
+@media (min-width: 721px) {
+  .hero--split {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: clamp(1rem, 3vw, 3rem);
+  }
+
+  .hero__stage {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: calc(4em + var(--bleed-y) * 2);
+  }
+
+  .hero__intro {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .hero__orbit {
+    opacity: 1;
+  }
+}
+
+/* The rings turn on the clock, not on when this page loaded: the head script of each page puts the
+   time (in seconds, wrapped at the common multiple of the three periods) in --orbit-t, so the
+   Experience page's rings carry on from where the Projects page's were when the page slides. */
+.hero__orbit i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--accent) 38%, transparent);
+  animation: orbitSpin 70s linear infinite;
+  animation-delay: calc(-1s * mod(var(--orbit-t, 0), 70));
+}
+
+.hero__orbit i:nth-child(2) {
+  inset: 15%;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  animation-duration: 44s;
+  animation-direction: reverse;
+  animation-delay: calc(-1s * mod(var(--orbit-t, 0), 44));
+}
+
+.hero__orbit i:nth-child(3) {
+  inset: 32%;
+  animation-duration: 30s;
+  animation-delay: calc(-1s * mod(var(--orbit-t, 0), 30));
+}
+
+.hero__orbit i::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+@keyframes orbitSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hero__glow {
+  .hero__glow,
+  .hero__orbit i {
     animation: none;
+  }
+
+  .btn {
+    transition: none;
   }
 }

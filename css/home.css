@@ -114,257 +114,17 @@
   background: var(--accent);
 }
 
-/* Hero extras that only the home page has (the shared hero is in hero.css). */
+/* Hero extras that only the home page has (the shared split hero, with the name, its rings and
+   pictures, is in hero.css). */
 
-/* The name hangs in the middle of the orbit rings, and the greeting sits right above the bio, so
-   "Hello there!" reads as Alberto saying it and not as someone greeting him. Wide: the intro
-   (greeting, bio, buttons) on the left and the name with its rings on the right. Narrow: stacked,
-   the name first, then the greeting and the bio. */
+/* Room below the buttons for the flow's starting pin */
 .home .hero {
-  display: grid;
-  gap: 1.75rem;
-  /* Room below the buttons for the flow's starting pin */
   padding-bottom: 7rem;
-  /* how far the bio and the buttons step in from the greeting's edge */
-  --intro-indent: clamp(0rem, 3vw, 2.5rem);
-}
-
-.hero__stage {
-  position: relative;
-  display: grid;
-  align-content: center;
-  justify-items: start;
-  width: fit-content;
-  /* The size of the name (it takes this size, below), so the rings can be sized in em and always wrap it */
-  font-size: clamp(2.6rem, 10vw, 6.75rem);
-  min-height: 3.4em;
-  /* The rings spin, and a spinning circle's box swings out to its corners, which would widen the
-     page on narrower windows. Clipping sideways stops that; the padding (taken back by the
-     margin) leaves the rings, which overhang the name a little, room to show in full. */
-  overflow-x: clip;
-  --bleed: min(0.2em, 1.4rem); /* never more than the page's own side padding, or the stage would stick out of it */
-  padding-inline: var(--bleed);
-  margin-inline: calc(var(--bleed) * -1);
-}
-
-/* The two profile pictures, overlapping like two circles that merge, just above the name */
-.hero__avatars {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  /* centered above the name, whichever side of the page the name is on */
-  justify-self: center;
-  margin-bottom: 0.1em;
-  /* its own size, not the name's, so making the name smaller doesn't shrink the faces; never too
-     small to read as a face */
-  --avatar: max(3.5rem, min(9.66vw, 6.51rem));
-}
-
-.hero__avatar {
-  width: var(--avatar);
-  height: var(--avatar);
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--bg-elevated);
-  border: 3px solid var(--bg);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
-    0 12px 22px -12px color-mix(in srgb, #000 55%, transparent);
-}
-
-.hero__avatar--github {
-  rotate: -6deg;
-}
-
-/* in front of the first, just touching it */
-.hero__avatar--linkedin {
-  margin-left: calc(var(--avatar) * -0.12);
-  rotate: 5deg;
-}
-
-.home .hero__name {
-  font-size: 1em; /* the stage's size, not the larger one the Experience page's hero uses */
-}
-
-.hero__intro {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-/* the bio follows straight on from the greeting above it */
-.home .hero__lede {
-  margin: 0 0 0 var(--intro-indent);
-}
-
-.hero__orbit {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 4.1em;
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-/* Too narrow for the two side by side: the name, with its pictures and rings, hugs the right edge,
-   and the greeting, the bio and the buttons stay on the left below it. */
-@media (max-width: 720px) {
-  .hero__stage {
-    justify-self: end;
-    justify-items: end;
-  }
-}
-
-@media (min-width: 721px) {
-  .home .hero {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: clamp(1rem, 3vw, 3rem);
-  }
-
-  .hero__stage {
-    grid-column: 2;
-    grid-row: 1;
-    min-height: 4em;
-  }
-
-  .hero__intro {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .hero__orbit {
-    opacity: 1;
-  }
-}
-
-.hero__orbit i {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px dashed color-mix(in srgb, var(--accent) 38%, transparent);
-  animation: orbitSpin 70s linear infinite;
-}
-
-.hero__orbit i:nth-child(2) {
-  inset: 15%;
-  border-style: solid;
-  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
-  animation-duration: 44s;
-  animation-direction: reverse;
-}
-
-.hero__orbit i:nth-child(3) {
-  inset: 32%;
-  animation-duration: 30s;
-}
-
-.hero__orbit i::after {
-  content: "";
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  margin-left: -4px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 12px var(--accent);
-}
-
-@keyframes orbitSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.hero__hello,
-.hero__links {
-  position: relative;
-  z-index: 1;
-}
-
-.hero__hello {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.4rem;
-  width: fit-content;
-  margin-bottom: 0.4rem;
-  color: var(--accent-ink);
-  rotate: -4deg;
-}
-
-.hero__note {
-  margin: 0;
-  font-family: var(--font-hand);
-  font-size: clamp(2.3rem, 6.4vw, 3.7rem);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.hero__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.9rem 1rem;
-  margin: 1.75rem 0 0 var(--intro-indent);
 }
 
 .hero__pin {
   left: calc(var(--intro-indent) + 1.6rem);
   bottom: 2.25rem;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.7rem 1.3rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--deco-grey) 70%, transparent);
-  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
-  backdrop-filter: blur(6px);
-  color: var(--text);
-  font-size: 0.95rem;
-  font-weight: 600;
-  transition: rotate 0.25s ease, translate 0.25s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease, scale var(--press-time, 0.4s) var(--spring);
-}
-
-.btn:nth-child(odd) {
-  rotate: -2.5deg;
-}
-
-.btn:nth-child(even) {
-  rotate: 2deg;
-  translate: 0 0.4rem;
-}
-
-.btn:hover,
-.btn:focus-visible {
-  rotate: 0deg;
-  translate: 0 -2px;
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--btn-primary-text);
-  text-decoration: none;
-}
-
-.btn:active {
-  scale: var(--press);
-  --press-time: 0.09s; /* dips quickly, springs back slowly */
-}
-
-.btn__arrow {
-  display: inline-block;
-  transition: transform 0.2s ease;
-}
-
-.btn:hover .btn__arrow {
-  transform: translate(2px, -2px);
 }
 
 /* Journey: every app and project is a station on the same line (mobile-first; the
@@ -923,7 +683,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__orbit i,
   .station__orbit {
     animation: none;
   }
@@ -935,8 +694,7 @@
   .station__icon::before,
   .station__langs,
   .station__langs-list li::before,
-  .station--langs[data-chart-over] .station__body > *,
-  .btn {
+  .station--langs[data-chart-over] .station__body > * {
     transition: none;
   }
 
