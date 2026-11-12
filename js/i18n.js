@@ -123,6 +123,9 @@ const translations = {
 
     "footer-cta": "Let's get to work.",
     "footer-visit": "{n} visit",
+    "motion-label": "Swinging buttons",
+    "motion-pause": "Pause the swinging buttons",
+    "motion-play": "Make the buttons swing",
     "footer-visits": "{n} visits",
 
     "theme-light": "Light theme",
@@ -252,6 +255,9 @@ const translations = {
 
     "footer-cta": "Manos a la obra.",
     "footer-visit": "{n} visita",
+    "motion-label": "Botones que se balancean",
+    "motion-pause": "Pausar el balanceo de los botones",
+    "motion-play": "Activar el balanceo de los botones",
     "footer-visits": "{n} visitas",
 
     "theme-light": "Tema claro",

@@ -11,7 +11,8 @@
 // resistance and, once released, springs back and bounces. A control that has stopped moving goes
 // to sleep so an idle page costs nothing. On a phone or tablet, tilting the device tilts "down" for
 // the ropes, so the controls hang along it. Uses `reducedMotion` from main.js: with reduced motion
-// the ropes are drawn once, straight, and nothing moves.
+// the ropes are drawn once, straight, and nothing moves. A small floating switch (made here) lets
+// anyone else turn the motion off too, and the choice is remembered.
 (() => {
   const nav = document.querySelector(".nav");
   const svg = nav && nav.querySelector(".nav__ropes");
@@ -60,6 +61,16 @@
   let lastScrollY = window.scrollY;
   let smoothScroll = 0;
   let firstBuild = true;
+
+  // Whether the controls may move at all. The system's "reduce motion" setting always wins; apart
+  // from that, the floating switch below turns it off and on, and the choice is kept in the browser
+  // so it carries over from page to page.
+  const MOTION_KEY = "nav-motion";
+  let motionOn = true;
+  try {
+    motionOn = localStorage.getItem(MOTION_KEY) !== "off";
+  } catch (err) { /* storage blocked: motion stays on, and just isn't remembered */ }
+  const isStill = () => reducedMotion || !motionOn;
   let tilt = 0; // how far "down" leans from straight down on the screen, in radians (positive: to the right)
   let tiltTarget = 0; // where the sensors say it should be; tilt eases towards it
   let gravX = 0; // gravity per substep, split along the screen; straight down unless the device is tilted
@@ -338,7 +349,7 @@
   };
 
   function ensureLoop() {
-    if (reducedMotion || raf) return;
+    if (isStill() || raf) return;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   }
@@ -354,7 +365,7 @@
     // cooldown so sweeping back and forth can't build up a swing. Grabbing is the real physics.
     el.addEventListener("pointerenter", (e) => {
       const item = el.hangItem;
-      if (!item || e.pointerType !== "mouse" || item.drag || e.buttons) return;
+      if (isStill() || !item || e.pointerType !== "mouse" || item.drag || e.buttons) return;
       const now = performance.now();
       if (now - item.lastNudge < HOVER_COOLDOWN || item.energy > 1) return;
       item.lastNudge = now;
@@ -372,7 +383,7 @@
 
     el.addEventListener("pointerdown", (e) => {
       const item = el.hangItem;
-      if (!item || touching || e.button !== 0) return;
+      if (isStill() || !item || touching || e.button !== 0) return;
       const isMouse = e.pointerType === "mouse";
       touching = !isMouse;
       const threshold = isMouse ? DRAG_THRESHOLD : TOUCH_DRAG_THRESHOLD;
@@ -469,7 +480,7 @@
   // is then turned into the screen's axes by the screen's rotation. The ropes hang along it, and
   // tilt is how far it leans from straight down on the screen.
   const onOrientation = (e) => {
-    if (e.beta == null || e.gamma == null) return; // a device (or a desktop browser) with no sensor
+    if (isStill() || e.beta == null || e.gamma == null) return; // still, or a device (or a desktop browser) with no sensor
     const beta = (e.beta * Math.PI) / 180;
     const gamma = (e.gamma * Math.PI) / 180;
     const dx = Math.sin(gamma) * Math.cos(beta); // gravity along the device's x (to its right)...
@@ -503,6 +514,7 @@
 
     if (typeof DeviceOrientationEvent.requestPermission === "function") {
       const askForMotion = (e) => {
+        if (isStill()) return; // nothing to ask for while the motion is off
         if (e.pointerType !== "touch" || !(e.target instanceof Element) || !e.target.closest(".hang")) return;
         document.removeEventListener("pointerup", askForMotion, true);
         try {
@@ -579,7 +591,7 @@
   };
 
   const saveState = () => {
-    if (reducedMotion) return;
+    if (isStill()) return;
     try {
       sessionStorage.setItem(STATE_KEY, JSON.stringify({ t: Date.now(), items: items.map(snapshot) }));
     } catch (err) { /* blocked: the next page starts fresh */ }
@@ -589,7 +601,7 @@
 
   const build = () => {
     // The motion to carry over: the ropes being replaced, or (on the first build) the previous page's
-    const carried = items.length ? items.map(snapshot) : firstBuild && !reducedMotion ? loadState() : null;
+    const carried = items.length ? items.map(snapshot) : firstBuild && !isStill() ? loadState() : null;
 
     items.forEach((item) => {
       item.el.style.transform = "";
@@ -608,7 +620,8 @@
       }
     });
 
-    if (reducedMotion) {
+    if (isStill()) {
+      firstBuild = false;
       items.forEach(renderStatic);
       return;
     }
@@ -634,11 +647,65 @@
     });
   };
 
+  // ------------------------------------------------------------------ the on/off switch
+
+  const setMotion = (on) => {
+    motionOn = on;
+    try {
+      if (on) localStorage.removeItem(MOTION_KEY);
+      else localStorage.setItem(MOTION_KEY, "off");
+    } catch (err) { /* not remembered, but it still works for this visit */ }
+    document.documentElement.classList.toggle("nav-still", isStill());
+
+    if (!on) {
+      // stop everything that moves, and forget what was pushing it
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      pendingScroll = 0;
+      smoothScroll = 0;
+      tilt = 0;
+      tiltTarget = 0;
+      gravX = 0;
+      gravY = GRAVITY;
+      document.documentElement.classList.remove("is-dragging-hang");
+    }
+
+    build(); // still: every rope drawn straight; moving: the resting state carried over
+    // a little sway as the answer to "turn it on"
+    if (on) setTimeout(() => items.forEach((item, i) => kick(item, (i % 2 ? -1 : 1) * (0.5 + 0.2 * (i % 3)))), 120);
+  };
+
+  // The small floating button that calls it. Not made for people whose system already asks for
+  // less motion: for them the ropes are still anyway.
+  const makeSwitch = () => {
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "motion-toggle";
+    toggle.innerHTML =
+      '<svg class="motion-toggle__pause" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>' +
+      '<svg class="motion-toggle__play" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z"/></svg>';
+
+    // its words: the name stays the same, whether it is on is what aria-pressed says, and the
+    // tooltip says what pressing it will do
+    const describe = () => {
+      const t = window.i18n.t;
+      toggle.setAttribute("aria-pressed", String(motionOn));
+      toggle.setAttribute("aria-label", t("motion-label"));
+      toggle.title = t(motionOn ? "motion-pause" : "motion-play");
+    };
+    toggle.addEventListener("click", () => {
+      setMotion(!motionOn);
+      describe();
+    });
+    document.addEventListener("langchange", describe);
+    describe();
+    document.body.appendChild(toggle);
+  };
+
   window.addEventListener(
     "scroll",
     () => {
       const y = window.scrollY;
-      pendingScroll += y - lastScrollY;
+      if (!isStill()) pendingScroll += y - lastScrollY;
       lastScrollY = y;
       ensureLoop();
     },
@@ -660,5 +727,7 @@
   document.addEventListener("langchange", rebuild);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild);
 
+  document.documentElement.classList.toggle("nav-still", isStill());
+  if (!reducedMotion) makeSwitch();
   build();
 })();

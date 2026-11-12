@@ -11,6 +11,7 @@
   --accent: #fbbf24;
   --accent-ink: #fbbf24;
   --accent-dim: #c8920a;
+  --accent-line: #fbbf24; /* outlines that must stand out from the page */
   --btn-primary-text: #1c1400;
   --hero-glow-opacity: 1;
   --radius: 10px;
@@ -241,6 +242,81 @@ body {
 
 .hang--coffee-compact {
   display: none; /* narrow screens only, see the media query below */
+}
+
+/* Still ropes (the motion switched off, or reduced motion asked for): a finger on a tag is just a
+   finger on a link, so it must still be able to scroll the page */
+.nav-still .hang {
+  touch-action: auto;
+}
+
+/* The small floating switch for the hanging buttons' motion (nav.js makes it). It shows what
+   pressing it does: pause while the buttons swing, play while they are still. It sits right under
+   the hanging toggles, at their right edge (the same frame as the nav), so it reads as theirs. */
+.motion-toggle {
+  position: fixed;
+  top: 6rem;
+  right: max(1.5rem, calc((100vw - 1500px) / 2));
+  z-index: 15;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  /* A clear outline in the accent colour (the strong one: --accent-line), and a soft halo, so it is
+     plainly a button and not part of the page */
+  border: 2px solid var(--accent-line);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 10px 18px -10px color-mix(in srgb, #000 60%, transparent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, color 0.15s ease, scale var(--press-time, 0.4s) var(--spring);
+}
+
+.motion-toggle svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: currentColor;
+}
+
+.motion-toggle__play,
+.motion-toggle[aria-pressed="false"] .motion-toggle__pause {
+  display: none;
+}
+
+.motion-toggle[aria-pressed="false"] .motion-toggle__play {
+  display: block;
+}
+
+/* switched off: the outline stays (it is still a button), the icon goes quiet */
+.motion-toggle[aria-pressed="false"] {
+  color: var(--text);
+}
+
+.motion-toggle:hover,
+.motion-toggle:focus-visible {
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--accent) 26%, transparent),
+    0 10px 18px -10px color-mix(in srgb, #000 60%, transparent);
+}
+
+.motion-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.motion-toggle:active {
+  scale: var(--press);
+  --press-time: 0.09s;
+}
+
+@media print {
+  .motion-toggle {
+    display: none;
+  }
 }
 
 /* While a control is being dragged with the mouse or a finger */
@@ -902,6 +978,12 @@ main {
     display: none;
   }
 
+  /* the toggles hang on shorter ropes here, so the switch sits closer under them */
+  .motion-toggle {
+    top: 4.6rem;
+    right: 1rem;
+  }
+
   /* Hangs at the left end of the row (the room beside the language toggle), but stays last in the
      tab order, after the two pages. */
   .hang--coffee-compact {
@@ -937,6 +1019,10 @@ main {
     margin-right: 0.4rem;
   }
 
+  .motion-toggle {
+    right: 0.75rem;
+  }
+
   .nav-tag {
     padding: 0.32rem 0.6rem;
     font-size: 0.78rem;
@@ -968,6 +1054,7 @@ main {
   --accent: #ca8a04;
   --accent-ink: #a16207;
   --accent-dim: #854d0e;
+  --accent-line: #854d0e;
   --btn-primary-text: #1c1400;
   --hero-glow-opacity: 0.6;
 }
@@ -984,6 +1071,7 @@ main {
   --accent: #fbbf24;
   --accent-ink: #fbbf24;
   --accent-dim: #c8920a;
+  --accent-line: #fbbf24;
   --btn-primary-text: #1c1400;
   --hero-glow-opacity: 1;
 }
@@ -1001,6 +1089,7 @@ main {
     --accent: #ca8a04;
     --accent-ink: #a16207;
     --accent-dim: #854d0e;
+    --accent-line: #854d0e;
     --btn-primary-text: #1c1400;
     --hero-glow-opacity: 0.6;
   }
