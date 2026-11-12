@@ -86,13 +86,6 @@
       length: i < SEGMENTS ? link : bodyLength,
     }));
 
-    const nail = document.createElementNS(SVG_NS, "circle");
-    nail.setAttribute("class", "nail");
-    nail.setAttribute("cx", cx);
-    nail.setAttribute("cy", 2);
-    nail.setAttribute("r", 2.8);
-    svg.appendChild(nail);
-
     return {
       el,
       pts,
@@ -105,7 +98,6 @@
       gain: 0.85 + 0.3 * ((Math.sin(index * 12.9898 + 1.7) + 1) / 2),
       strand: makePath("rope"),
       twist: makePath("rope rope--twist"),
-      nail,
       restPose: pts.map((p) => [p.x, p.y]),
       energy: 1,
       still: 0,

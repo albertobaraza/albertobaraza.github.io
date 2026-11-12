@@ -125,10 +125,6 @@ body {
   stroke-dasharray: 1.5 4;
 }
 
-.nav__ropes .nail {
-  fill: var(--rope-color);
-}
-
 /* A hanging control. Its top edge is where the rope attaches; --rope is how far below the top of
    the window that is. nav.js rotates/translates it around that point. */
 .hang {
