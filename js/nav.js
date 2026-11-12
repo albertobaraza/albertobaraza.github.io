@@ -6,10 +6,11 @@
 // the attach point at the tag's eyelet. Verlet integration + distance constraints give a rope
 // that bends and a tag that swings like a pendulum. Scroll speed pushes everything sideways like
 // wind. Hovering a tag only gives it a tiny nudge; the real interaction is grabbing it (click and
-// drag with the mouse, or press and drag with a finger without lifting it) and flinging it. A
-// control that has stopped moving goes to sleep so an idle page costs nothing. Uses
-// `reducedMotion` from main.js: with reduced motion the ropes are drawn once, straight, and
-// nothing moves.
+// drag with the mouse, or press and drag with a finger without lifting it), flinging it, or
+// pulling it past the rope's length: the rope is elastic, so it stretches against growing
+// resistance and, once released, springs back and bounces. A control that has stopped moving goes
+// to sleep so an idle page costs nothing. Uses `reducedMotion` from main.js: with reduced motion
+// the ropes are drawn once, straight, and nothing moves.
 (() => {
   const nav = document.querySelector(".nav");
   const svg = nav && nav.querySelector(".nav__ropes");
@@ -30,6 +31,18 @@
   const TOUCH_DRAG_THRESHOLD = 10; // fingers jitter more than a mouse, so a tap gets more slack
   const HOVER_NUDGE = 0.07; // sideways velocity (px/substep) when the cursor arrives: about a 2° sway
   const HOVER_COOLDOWN = 600; // ms before the same control can be nudged again
+
+  // Elasticity. A rope can be pulled longer than it is. The pull meets rubber-band resistance (it
+  // gets harder, and saturates at MAX_PULL more length), and on release the rope springs back and
+  // overshoots, so the tag shoots up past where it hangs and bounces before it settles.
+  const MAX_PULL = 0.9; // the most a rope can be stretched, as a share of its own length...
+  const MIN_PULL_PX = 44; // ...but never less than this, so even the shortest ropes can be pulled
+  const ELASTIC_PERIOD = 0.45; // seconds per bounce
+  const ELASTIC_DAMPING = 0.35; // 0 bounces forever, 1 just eases back with no overshoot
+  const MIN_STRETCH = 0.7; // how much shorter than its length the rope can recoil at most
+  const TAG_KEEP = 0.9; // share of the tag's swing kept each substep during a recoil (friction at the eyelet)
+  const STRETCH_K = (((2 * Math.PI) / (ELASTIC_PERIOD * RATE)) ** 2); // spring stiffness per substep²
+  const STRETCH_C = 2 * ELASTIC_DAMPING * Math.sqrt(STRETCH_K); // spring damping per substep
 
   const SVG_NS = "http://www.w3.org/2000/svg";
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -94,6 +107,11 @@
       body,
       rest: { x: cx, y: top },
       ropeLength,
+      link,
+      maxPull: Math.max(ropeLength * MAX_PULL, MIN_PULL_PX),
+      stretch: 1, // rope length now, as a multiple of its length at rest
+      stretchVel: 0,
+      stretchApplied: 1, // what the constraints and the drawing were last told
       // each control reacts to the wind a little differently
       gain: 0.85 + 0.3 * ((Math.sin(index * 12.9898 + 1.7) + 1) / 2),
       strand: makePath("rope"),
@@ -123,9 +141,31 @@
     b.y -= (dy * diff * b.inv) / w;
   };
 
+  // While a rope is stretched or recoiling it is a straight rubber band: its end (the attach point)
+  // is held exactly the rope's current length from the anchor, and can still swing sideways. This
+  // keeps the recoil a clean bounce. Left to the ordinary rope constraints, the heavy tag would be
+  // thrown past where it hangs and the rope would go slack.
+  const holdLength = (item) => {
+    const { attach } = item;
+    const anchor = item.pts[0];
+    const dx = attach.x - anchor.x;
+    const dy = attach.y - anchor.y;
+    const scale = (item.ropeLength * item.stretch) / (Math.hypot(dx, dy) || 1e-6);
+    attach.x = anchor.x + dx * scale;
+    attach.y = anchor.y + dy * scale;
+  };
+
   const simulate = (item, wind) => {
     const { pts, constraints, attach, drag } = item;
     const damping = !drag && item.energy < CALM_ENERGY ? CALM_DAMPING : DAMPING;
+
+    // A recoil yanks the rope's end hard. Friction at the eyelet stops the heavy tag from being
+    // whipped around it (it would flip over): its swing, relative to the eyelet, is damped.
+    if (!drag && item.stretch !== 1) {
+      const { body } = item;
+      body.px += ((body.x - body.px) - (attach.x - attach.px)) * (1 - TAG_KEEP);
+      body.py += ((body.y - body.py) - (attach.y - attach.py)) * (1 - TAG_KEEP);
+    }
 
     for (const p of pts) {
       if (!p.inv) continue;
@@ -142,13 +182,46 @@
       attach.y += (drag.y - attach.y) * 0.55;
     }
 
+    // Elasticity: while held, the rope is as long as the pull makes it. Once let go, its length is
+    // a damped spring back to normal, and the constraints below drag the whole rope (and the tag)
+    // with it, which is what makes the bounce.
+    if (drag) {
+      item.stretch += (drag.stretch - item.stretch) * 0.5;
+      item.stretchVel = 0;
+    } else if (item.stretch !== 1 || item.stretchVel) {
+      item.stretchVel -= STRETCH_K * (item.stretch - 1) + STRETCH_C * item.stretchVel;
+      item.stretch += item.stretchVel;
+      if (item.stretch < MIN_STRETCH) {
+        item.stretch = MIN_STRETCH;
+        item.stretchVel = Math.max(0, item.stretchVel);
+      }
+      if (Math.abs(item.stretch - 1) < 0.0015 && Math.abs(item.stretchVel) < 0.0005) {
+        item.stretch = 1;
+        item.stretchVel = 0;
+      }
+    }
+    if (item.stretch !== item.stretchApplied) {
+      for (let i = 0; i < SEGMENTS; i++) constraints[i].length = item.link * item.stretch;
+      item.stretchApplied = item.stretch;
+    }
+
+    const elastic = !drag && item.stretch !== 1;
+    if (elastic) holdLength(item);
     for (let k = 0; k < ITERATIONS; k++) constraints.forEach(relax);
+    if (elastic) holdLength(item);
+
+    // A tag can swing up to horizontal but never flips over its eyelet
+    const { body } = item;
+    if (body.y < attach.y) {
+      body.y = body.py = attach.y;
+      body.px = body.x;
+    }
 
     // fall asleep once everything has stopped moving
     let energy = 0;
     for (const p of pts) if (p.inv) energy += Math.abs(p.x - p.px) + Math.abs(p.y - p.py);
     item.energy = energy;
-    item.still = !drag && wind === 0 && energy < 0.025 * pts.length ? item.still + 1 : 0;
+    item.still = !drag && wind === 0 && item.stretch === 1 && energy < 0.025 * pts.length ? item.still + 1 : 0;
     if (item.still > RATE / 2) sleep(item);
   };
 
@@ -198,6 +271,16 @@
     const d = ropeD(item.pts.slice(0, SEGMENTS + 1));
     item.strand.setAttribute("d", d);
     item.twist.setAttribute("d", d);
+
+    // a stretched rope gets thinner and its twist spreads out (style.css reads these two numbers)
+    if (item.stretch !== item.drawnStretch) {
+      item.drawnStretch = item.stretch;
+      const thin = clamp(1 / Math.sqrt(item.stretch), 0.55, 1.2).toFixed(3);
+      for (const path of [item.strand, item.twist]) {
+        path.style.setProperty("--thin", thin);
+        path.style.setProperty("--stretch", item.stretch.toFixed(3));
+      }
+    }
   };
 
   const renderStatic = (item) => {
@@ -297,25 +380,30 @@
           if (Math.hypot(ev.clientX - press.x, ev.clientY - press.y) < threshold) return;
           press.moved = true;
           item.attach.inv = 0; // pinned to the pointer while held
-          item.drag = { x: item.attach.x, y: item.attach.y };
+          item.drag = { x: item.attach.x, y: item.attach.y, stretch: item.stretch };
           document.documentElement.classList.add("is-dragging-hang");
           try { el.setPointerCapture(press.id); } catch (err) { /* not capturable: fine */ }
           wake(item);
           ensureLoop();
         }
-        // follow the pointer, but never farther from the anchor than the rope is long
+        // Follow the pointer. Within the rope's length it is 1:1; past that the rope stretches, with
+        // resistance that grows until it can't be pulled any farther (an exponential ease-out).
         const ax = item.pts[0].x;
         const ay = item.pts[0].y;
         let tx = ev.clientX - press.grabX;
         let ty = ev.clientY - press.grabY;
-        const reach = item.ropeLength * 0.98;
         const len = Math.hypot(tx - ax, ty - ay);
-        if (len > reach) {
-          tx = ax + ((tx - ax) * reach) / len;
-          ty = ay + ((ty - ay) * reach) / len;
+        let stretch = 1;
+        if (len > item.ropeLength) {
+          const pulled = item.maxPull * (1 - Math.exp(-(len - item.ropeLength) / item.maxPull));
+          const dist = item.ropeLength + pulled;
+          tx = ax + ((tx - ax) * dist) / len;
+          ty = ay + ((ty - ay) * dist) / len;
+          stretch = dist / item.ropeLength;
         }
         item.drag.x = tx;
         item.drag.y = ty;
+        item.drag.stretch = stretch;
 
         const dtMs = Math.max(1, ev.timeStamp - press.lastT);
         press.vx = press.vx * 0.6 + ((ev.clientX - press.lastX) / dtMs) * 0.4;

@@ -120,7 +120,7 @@ body {
 .nav__ropes .rope {
   fill: none;
   stroke: var(--rope-color);
-  stroke-width: 1.8;
+  stroke-width: calc(1.8px * var(--thin, 1)); /* nav.js thins a stretched rope */
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -128,8 +128,8 @@ body {
 /* a lighter, dashed strand on top of the rope gives it a twisted-thread look */
 .nav__ropes .rope--twist {
   stroke: color-mix(in srgb, var(--text) 40%, transparent);
-  stroke-width: 1;
-  stroke-dasharray: 1.5 4;
+  stroke-width: calc(1px * var(--thin, 1));
+  stroke-dasharray: calc(1.5px * var(--stretch, 1)) calc(4px * var(--stretch, 1));
 }
 
 /* A hanging control. Its top edge is where the rope attaches; --rope is how far below the top of
