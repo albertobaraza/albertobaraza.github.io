@@ -167,8 +167,10 @@ body {
   pointer-events: none;
 }
 
-.nav__links .hang:nth-child(1) { --rope: 58px; }
-.nav__links .hang:nth-child(2) { --rope: 40px; }
+/* The two page tags hang at the same height (the same as the coffee tag's default), so the page
+   slide between them reads as sideways and parallel: one hanging lower would look off-level. */
+.nav__links .hang:nth-child(1),
+.nav__links .hang:nth-child(2) { --rope: 54px; }
 .hang--lang { --rope: 66px; }
 .hang--theme { --rope: 46px; }
 
@@ -983,8 +985,8 @@ main {
     font-size: 0.82rem;
   }
 
-  .nav__links .hang:nth-child(1) { --rope: 58px; }
-  .nav__links .hang:nth-child(2) { --rope: 70px; }
+  .nav__links .hang:nth-child(1),
+  .nav__links .hang:nth-child(2) { --rope: 64px; } /* the page tags, level with each other */
   .nav__links .hang:nth-child(3) { --rope: 62px; }
 
   .hang--coffee {

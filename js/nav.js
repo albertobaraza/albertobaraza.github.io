@@ -136,7 +136,9 @@
       stretchVel: 0,
       stretchApplied: 1, // what the constraints and the drawing were last told
       // each control reacts to the wind a little differently
-      gain: 0.85 + 0.3 * ((Math.sin(index * 12.9898 + 1.7) + 1) / 2),
+      // The two page tags answer to wind exactly alike (they hang side by side and the page slide
+      // blows through both), the other controls each a little differently
+      gain: el.matches(".nav__links .hang:nth-child(-n+2)") ? 1 : 0.85 + 0.3 * ((Math.sin(index * 12.9898 + 1.7) + 1) / 2),
       strand: makePath("rope"),
       twist: makePath("rope rope--twist"),
       restPose: pts.map((p) => [p.x, p.y]),
