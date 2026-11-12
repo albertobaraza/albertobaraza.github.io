@@ -120,7 +120,7 @@ body {
 .nav__ropes .rope {
   fill: none;
   stroke: var(--rope-color);
-  stroke-width: calc(1.8px * var(--thin, 1)); /* nav.js thins a stretched rope */
+  stroke-width: calc(2.6px * var(--thin, 1)); /* nav.js thins a stretched rope */
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -128,8 +128,8 @@ body {
 /* a lighter, dashed strand on top of the rope gives it a twisted-thread look */
 .nav__ropes .rope--twist {
   stroke: color-mix(in srgb, var(--text) 40%, transparent);
-  stroke-width: calc(1px * var(--thin, 1));
-  stroke-dasharray: calc(1.5px * var(--stretch, 1)) calc(4px * var(--stretch, 1));
+  stroke-width: calc(1.3px * var(--thin, 1));
+  stroke-dasharray: calc(2px * var(--stretch, 1)) calc(5.5px * var(--stretch, 1));
 }
 
 /* A hanging control. Its top edge is where the rope attaches; --rope is how far below the top of
@@ -144,22 +144,6 @@ body {
   -webkit-touch-callout: none; /* no link preview sheet on a long press (iOS) */
   touch-action: none; /* a finger on a control drags it instead of scrolling the page */
   will-change: transform;
-}
-
-/* the eyelet the rope is tied to */
-.hang::before {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  top: -5px;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  margin-left: -4.5px;
-  border-radius: 50%;
-  border: 2px solid var(--rope-color);
-  background: var(--bg);
-  pointer-events: none;
 }
 
 /* no-JS fallback: a straight rope up to the top edge */

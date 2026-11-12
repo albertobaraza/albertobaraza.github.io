@@ -3,7 +3,7 @@
 // links and buttons, this file only moves them (CSS transform) and draws the ropes (SVG).
 //
 // Per control: a chain of rope points pinned to the top edge, then a "body" point hanging below
-// the attach point at the tag's eyelet. Verlet integration + distance constraints give a rope
+// the attach point on the tag's top edge. Verlet integration + distance constraints give a rope
 // that bends and a tag that swings like a pendulum. Scroll speed pushes everything sideways like
 // wind. Hovering a tag only gives it a tiny nudge; the real interaction is grabbing it (click and
 // drag with the mouse, or press and drag with a finger without lifting it), flinging it, or
@@ -40,7 +40,7 @@
   const ELASTIC_PERIOD = 0.45; // seconds per bounce
   const ELASTIC_DAMPING = 0.35; // 0 bounces forever, 1 just eases back with no overshoot
   const MIN_STRETCH = 0.7; // how much shorter than its length the rope can recoil at most
-  const TAG_KEEP = 0.9; // share of the tag's swing kept each substep during a recoil (friction at the eyelet)
+  const TAG_KEEP = 0.9; // share of the tag's swing kept each substep during a recoil (friction at the attach point)
   const STRETCH_K = (((2 * Math.PI) / (ELASTIC_PERIOD * RATE)) ** 2); // spring stiffness per substep²
   const STRETCH_C = 2 * ELASTIC_DAMPING * Math.sqrt(STRETCH_K); // spring damping per substep
 
@@ -159,8 +159,9 @@
     const { pts, constraints, attach, drag } = item;
     const damping = !drag && item.energy < CALM_ENERGY ? CALM_DAMPING : DAMPING;
 
-    // A recoil yanks the rope's end hard. Friction at the eyelet stops the heavy tag from being
-    // whipped around it (it would flip over): its swing, relative to the eyelet, is damped.
+    // A recoil yanks the rope's end hard. Friction where the tag hangs from the rope stops the
+    // heavy tag from being whipped around that point (it would flip over): its swing, relative to
+    // the attach point, is damped.
     if (!drag && item.stretch !== 1) {
       const { body } = item;
       body.px += ((body.x - body.px) - (attach.x - attach.px)) * (1 - TAG_KEEP);
@@ -210,7 +211,7 @@
     for (let k = 0; k < ITERATIONS; k++) constraints.forEach(relax);
     if (elastic) holdLength(item);
 
-    // A tag can swing up to horizontal but never flips over its eyelet
+    // A tag can swing up to horizontal but never flips over the point it hangs from
     const { body } = item;
     if (body.y < attach.y) {
       body.y = body.py = attach.y;
