@@ -4,8 +4,8 @@
    is derived from the theme tokens, so light/dark/system all work. */
 
 .home {
-  --dot: color-mix(in srgb, var(--text-muted) 30%, transparent);
-  --track: color-mix(in srgb, var(--text-muted) 45%, transparent);
+  --dot: color-mix(in srgb, var(--deco-grey) 30%, transparent);
+  --track: color-mix(in srgb, var(--deco-grey) 45%, transparent);
   --glow: color-mix(in srgb, var(--accent) 70%, transparent);
 }
 
@@ -218,7 +218,7 @@
   gap: 0.45rem;
   padding: 0.7rem 1.3rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--deco-grey) 70%, transparent);
   background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
   backdrop-filter: blur(6px);
   color: var(--text);

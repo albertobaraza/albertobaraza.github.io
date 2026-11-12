@@ -3,7 +3,11 @@
   --bg-elevated: #111722;
   --border: #1e2732;
   --text: #e6edf3;
-  --text-muted: #8b98a5;
+  /* Grey text on dark was hard to read, most of all the bio over the amber glow (4.8:1), so it is
+     lighter than it was (#8b98a5); about 7.6:1 there, and still clearly softer than --text. */
+  --text-muted: #b8c2cd;
+  /* the old grey, kept for what is only decoration (dots, tracks, ropes, button outlines) */
+  --deco-grey: #8b98a5;
   --accent: #fbbf24;
   --accent-ink: #fbbf24;
   --accent-dim: #c8920a;
@@ -67,7 +71,7 @@ body {
 }
 
 .nav {
-  --rope-color: color-mix(in srgb, var(--text-muted) 85%, var(--bg));
+  --rope-color: color-mix(in srgb, var(--deco-grey) 85%, var(--bg));
   --tag-shadow: 0 10px 18px -12px color-mix(in srgb, #000 60%, transparent);
   position: fixed;
   top: 0;
@@ -960,6 +964,7 @@ main {
   --border: #e2e5e9;
   --text: #14181f;
   --text-muted: #5a6472;
+  --deco-grey: #5a6472;
   --accent: #ca8a04;
   --accent-ink: #a16207;
   --accent-dim: #854d0e;
@@ -974,7 +979,8 @@ main {
   --bg-elevated: #111722;
   --border: #1e2732;
   --text: #e6edf3;
-  --text-muted: #8b98a5;
+  --text-muted: #b8c2cd;
+  --deco-grey: #8b98a5;
   --accent: #fbbf24;
   --accent-ink: #fbbf24;
   --accent-dim: #c8920a;
@@ -991,6 +997,7 @@ main {
     --border: #e2e5e9;
     --text: #14181f;
     --text-muted: #5a6472;
+    --deco-grey: #5a6472;
     --accent: #ca8a04;
     --accent-ink: #a16207;
     --accent-dim: #854d0e;
