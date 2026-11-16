@@ -273,16 +273,20 @@ const applyRelease = (station, release) => {
   }
 };
 
-// Projects are sorted by release date, oldest first, undated last; the flow follows whatever order
-// they end up in. Called each time a batch of release data arrives, so it must be safe to repeat.
-const SORT_PROJECTS_NEWEST_FIRST = false;
+// Projects are sorted by release date, newest first, then the ones without a date, and within the
+// same date (or without one) alphabetically by name; the flow follows whatever order they end up in.
+// Called each time a batch of release data arrives, so it must be safe to repeat.
+const projectName = (station) => station.querySelector(".station__title").textContent.replace("↗", "").trim();
+
+const compareProjects = (a, b) => {
+  const da = a.dataset.releaseDate, db = b.dataset.releaseDate;
+  if (da && db && da !== db) return da < db ? 1 : -1; // newest first
+  if (!da !== !db) return da ? -1 : 1; // undated last
+  return projectName(a).localeCompare(projectName(b), undefined, { sensitivity: "base" });
+};
+
 const refreshProjects = () => {
-  const dir = SORT_PROJECTS_NEWEST_FIRST ? -1 : 1;
-  const sorted = [...journeyMap.querySelectorAll(".station--project")].sort((a, b) => {
-    const da = a.dataset.releaseDate, db = b.dataset.releaseDate;
-    if (!da || !db) return !da - !db; // undated last
-    return da < db ? -dir : da > db ? dir : 0; // stable: ties keep page order
-  });
+  const sorted = [...journeyMap.querySelectorAll(".station--project")].sort(compareProjects);
   sorted.forEach((station, i) => {
     station.style.setProperty("--i", i + 1);
     journeyMap.insertBefore(station, moreStation);
