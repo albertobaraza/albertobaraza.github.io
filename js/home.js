@@ -1,5 +1,6 @@
-// Home page: pointer-lit grid, the flow (pipeline) through the page, app stations
-// and GitHub project cards. Uses `reducedMotion` from main.js.
+// Home page: pointer-lit grid, the flow (pipeline) through the page and the project stations.
+// Every project is one kind of station, whether it is written in index.html or comes from GitHub,
+// and shows its latest release. Uses `reducedMotion` from main.js.
 
 const homeMain = document.querySelector(".home-main");
 
@@ -29,16 +30,18 @@ if (homeBg && !reducedMotion && window.matchMedia("(hover: hover) and (pointer: 
 }
 
 // ---------------------------------------------------------------------------
-// Localized dates. Elements carry data-date (ISO), data-date-label (i18n key) and
-// data-date-format ("day" | "month"); they are re-rendered whenever the language changes.
+// Localized dates. Elements carry data-date (ISO) and data-date-label (i18n key); they are
+// re-rendered whenever the language changes.
 // ---------------------------------------------------------------------------
 const renderDates = () => {
   const lang = window.i18n.getLang();
   document.querySelectorAll("[data-date]").forEach((el) => {
-    const options = el.dataset.dateFormat === "month"
-      ? { month: "short", year: "numeric" }
-      : { month: "short", day: "numeric", year: "numeric" };
-    const shown = new Date(el.dataset.date).toLocaleDateString(lang, { ...options, timeZone: "UTC" });
+    const shown = new Date(el.dataset.date).toLocaleDateString(lang, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    });
     el.textContent = `${window.i18n.t(el.dataset.dateLabel)} ${shown}`;
   });
 };
@@ -239,11 +242,60 @@ const flow = (() => {
 })();
 
 // ---------------------------------------------------------------------------
-// Stations from GitHub: the most recently pushed public repos join the journey, just before
-// the final "More on GitHub" stop. Falls back to the static stations if the request fails.
+// Projects. Every project is a `.station--project`, ahead of the closing "More on GitHub" stop.
+// Some are written in index.html (their release comes from their own /version.json), others are
+// built from GitHub (their release is the repo's latest GitHub release). Whatever the source, a
+// release is { version, releaseDate } ("X.Y.Z", "YYYY-MM-DD") and is shown the same way: a version
+// badge on the icon and a "Released:" line above the title. A project with no release has a release
+// of null (a repo without GitHub releases, a failed request, a /version.json without the fields)
+// and shows neither, through the same code.
 // ---------------------------------------------------------------------------
 const journeyMap = document.querySelector(".journey__map");
 const moreStation = document.querySelector(".station--more");
+
+const VERSION_PATTERN = /^\d+\.\d+\.\d+[\w.+-]*$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const applyRelease = (station, release) => {
+  const { version, releaseDate } = release ?? {}; // null: no release, so nothing to show
+  if (typeof version === "string" && VERSION_PATTERN.test(version)) {
+    const badge = document.createElement("span");
+    badge.className = "station__badge";
+    badge.textContent = `v${version}`;
+    station.querySelector(".station__icon").appendChild(badge);
+  }
+  if (typeof releaseDate === "string" && DATE_PATTERN.test(releaseDate)) {
+    station.dataset.releaseDate = releaseDate;
+    Object.assign(station.querySelector(".station__date").dataset, {
+      date: releaseDate,
+      dateLabel: "label-released",
+    });
+  }
+};
+
+// Projects are sorted by release date, oldest first, undated last; the flow follows whatever order
+// they end up in. Called each time a batch of release data arrives, so it must be safe to repeat.
+const SORT_PROJECTS_NEWEST_FIRST = false;
+const refreshProjects = () => {
+  const dir = SORT_PROJECTS_NEWEST_FIRST ? -1 : 1;
+  const sorted = [...journeyMap.querySelectorAll(".station--project")].sort((a, b) => {
+    const da = a.dataset.releaseDate, db = b.dataset.releaseDate;
+    if (!da || !db) return !da - !db; // undated last
+    return da < db ? -dir : da > db ? dir : 0; // stable: ties keep page order
+  });
+  sorted.forEach((station, i) => {
+    station.style.setProperty("--i", i + 1);
+    journeyMap.insertBefore(station, moreStation);
+  });
+  renderDates();
+  placeLanguageCharts();
+  flow.rebuild();
+};
+
+// ---------------------------------------------------------------------------
+// Projects from GitHub: the most recently pushed public repos join the journey. Falls back to the
+// projects written in index.html if the request fails.
+// ---------------------------------------------------------------------------
 const EXCLUDED_REPOS = new Set(["albertobaraza", "albertobaraza.github.io"]);
 
 // Extra public links per repo ([label, url]), shown under its description next to the main repo link.
@@ -260,10 +312,32 @@ const fetchTopLanguages = (repo) =>
     .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
     .then((bytesByLanguage) => Object.entries(bytesByLanguage).sort((a, b) => b[1] - a[1]));
 
-// GitHub allows 60 un-authenticated API requests an hour per IP and one page load costs 5, so a few
-// reloads (or a busy shared IP) would run the repo stations dry. The last complete answer is kept in
-// localStorage for an hour, and if a refresh fails the last good one is shown whatever its age.
-const REPOS_CACHE_KEY = "github-repos-v1";
+// The repo's latest published release (no drafts, no pre-releases) as { version, releaseDate }, or
+// null when it has none. Rejects when the request fails, like fetchTopLanguages. The list endpoint
+// is used because it answers 200 with [] for a repo without releases, where /releases/latest
+// would answer 404 (and log an error in every visitor's console).
+const fetchLatestRelease = (repo) =>
+  fetch(`${repo.url}/releases?per_page=5`)
+    .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+    .then((releases) => {
+      const latest = releases.find((release) => !release.draft && !release.prerelease);
+      if (!latest) return null;
+      return {
+        version: String(latest.tag_name).replace(/^v/i, ""),
+        releaseDate: String(latest.published_at || "").slice(0, 10),
+      };
+    });
+
+const fetchRepoDetails = (repo) =>
+  Promise.all([fetchTopLanguages(repo), fetchLatestRelease(repo)]).then(([languages, release]) => ({
+    languages,
+    release,
+  }));
+
+// GitHub allows 60 un-authenticated API requests an hour per IP and one page load costs 9, so a few
+// reloads (or a busy shared IP) would run the GitHub projects dry. The last complete answer is kept
+// in localStorage for an hour, and if a refresh fails the last good one is shown whatever its age.
+const REPOS_CACHE_KEY = "github-repos-v2";
 const REPOS_CACHE_TTL = 60 * 60 * 1000;
 
 const readReposCache = () => {
@@ -486,7 +560,7 @@ window.addEventListener("resize", () => {
   placeFrame = requestAnimationFrame(placeLanguageCharts);
 });
 
-const buildRepoStation = (repo, languages) => {
+const buildProjectStation = ({ repo, languages, release }) => {
   // A link can't nest inside another, so a station with extra links is a div whose title link
   // is stretched over the whole station (see .station--multi).
   const extraLinks = EXTRA_LINKS[repo.name] || [];
@@ -498,7 +572,6 @@ const buildRepoStation = (repo, languages) => {
   station.className =
     "station station--project" + (hasExtra ? " station--multi" : "") + (slices.length ? " station--langs" : "");
   station.style.setProperty("--node-color", color);
-  station.style.setProperty("--i", "1");
 
   const repoLink = hasExtra ? document.createElement("a") : station;
   repoLink.href = repo.html_url;
@@ -520,19 +593,8 @@ const buildRepoStation = (repo, languages) => {
   }
   icon.append(buildOrbit(slices), buildThumb(repo, color));
 
-  const license = repo.license?.spdx_id;
-  if (license && license !== "NOASSERTION") {
-    const badge = document.createElement("span");
-    badge.className = "station__badge";
-    badge.textContent = license;
-    icon.appendChild(badge);
-  }
-
   const date = document.createElement("span");
   date.className = "station__date";
-  if (repo.pushed_at) {
-    Object.assign(date.dataset, { date: repo.pushed_at, dateLabel: "label-last-commit", dateFormat: "month" });
-  }
 
   const title = document.createElement("h2");
   title.className = "station__title";
@@ -563,6 +625,7 @@ const buildRepoStation = (repo, languages) => {
   }
 
   station.append(icon, body);
+  applyRelease(station, release);
   if (slices.length) {
     const chartId = `lang-chart-${repo.id}`;
     station.appendChild(buildLanguageChart(slices, chartId));
@@ -572,7 +635,7 @@ const buildRepoStation = (repo, languages) => {
   return station;
 };
 
-// Resolves to [{ repo, languages }] for the repo stations: from the cache while it's fresh, else
+// Resolves to [{ repo, languages, release }] for the GitHub projects: from the cache while it's fresh, else
 // from GitHub (and then cached), else from a stale cache. Rejects only when there's nothing to show.
 const loadRepoProjects = async () => {
   const cached = readReposCache();
@@ -588,7 +651,7 @@ const loadRepoProjects = async () => {
       .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
       .slice(0, 4);
 
-    const stats = await Promise.all(top.map((repo) => fetchTopLanguages(repo).catch(() => null)));
+    const details = await Promise.all(top.map((repo) => fetchRepoDetails(repo).catch(() => null)));
     const projects = top.map((repo, i) => ({
       // Only what the station needs, so the cache stays small
       repo: {
@@ -596,14 +659,13 @@ const loadRepoProjects = async () => {
         name: repo.name,
         html_url: repo.html_url,
         description: repo.description,
-        pushed_at: repo.pushed_at,
-        license: repo.license ? { spdx_id: repo.license.spdx_id } : null,
       },
-      languages: stats[i] || [],
+      languages: details[i]?.languages || [],
+      release: details[i]?.release || null,
     }));
 
-    if (stats.every(Boolean)) writeReposCache(projects);
-    // Rate-limited part-way: the last complete answer beats one with missing language rings
+    if (details.every(Boolean)) writeReposCache(projects);
+    // Rate-limited part-way: the last complete answer beats one with missing language rings and releases
     else if (cached) return cached.projects;
     return projects;
   } catch (error) {
@@ -617,7 +679,7 @@ if (journeyMap && moreStation) {
     .then((projects) => {
       if (!projects.length) return;
 
-      // Now that repo stations precede it, "browse the rest" reads correctly
+      // Now that GitHub projects precede it, "browse the rest" reads correctly
       // instead of the plain fallback wording used when it's the only extra stop.
       const moreDesc = moreStation.querySelector('[data-i18n="proj-more-desc"]');
       if (moreDesc) {
@@ -625,66 +687,26 @@ if (journeyMap && moreStation) {
         moreDesc.innerHTML = window.i18n.t("proj-more-desc-live");
       }
 
-      projects.forEach(({ repo, languages }) =>
-        journeyMap.insertBefore(buildRepoStation(repo, languages), moreStation),
-      );
-
-      renderDates();
-      placeLanguageCharts();
-      flow.rebuild();
+      projects.forEach((project) => journeyMap.insertBefore(buildProjectStation(project), moreStation));
+      refreshProjects();
     })
     .catch(() => {
-      // Network error, rate limit and nothing cached, or no JS: the static stations stay as they are
+      // Network error, rate limit and nothing cached, or no JS: the projects from index.html stay as they are
     });
 }
 
 // ---------------------------------------------------------------------------
-// Apps: deployed version and release date from each app's own /version.json (open CORS).
-// An app that isn't live yet, or can't be reached, just gets no badge/date. App stations are then
-// sorted by releaseDate (YYYY-MM-DD), oldest first, undated last, and always stay ahead of the
-// project stations; the flow follows whatever order they end up in.
+// Projects written in index.html: the deployed version and release date come from each project's
+// own /version.json (open CORS), {"version":"X.Y.Z","releaseDate":"YYYY-MM-DD"}. A project that
+// isn't live yet, or can't be reached, just gets no badge or date.
 // ---------------------------------------------------------------------------
-const SORT_APPS_NEWEST_FIRST = false;
-const appStations = [...document.querySelectorAll("[data-version-url]")];
-
-const loadAppMeta = (station) =>
+const loadStaticRelease = (station) =>
   fetch(station.dataset.versionUrl)
     .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-    .then(({ version, releaseDate }) => {
-      if (typeof version === "string" && /^\d+\.\d+\.\d+[\w.+-]*$/.test(version)) {
-        const badge = document.createElement("span");
-        badge.className = "station__badge";
-        badge.textContent = `v${version}`;
-        station.querySelector(".station__icon").appendChild(badge);
-      }
-      if (typeof releaseDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) {
-        station.dataset.releaseDate = releaseDate;
-        Object.assign(station.querySelector(".station__date").dataset, {
-          date: releaseDate,
-          dateLabel: "label-released",
-          dateFormat: "day",
-        });
-      }
-    })
+    .then((release) => applyRelease(station, release))
     .catch(() => {});
 
-Promise.all(appStations.map(loadAppMeta)).then(() => {
-  const dir = SORT_APPS_NEWEST_FIRST ? -1 : 1;
-  const sorted = [...appStations].sort((a, b) => {
-    const da = a.dataset.releaseDate, db = b.dataset.releaseDate;
-    if (!da || !db) return !da - !db; // undated last
-    return da < db ? -dir : da > db ? dir : 0; // stable: ties keep page order
-  });
-  // Everything that isn't an app (Tapeo Dev, repos, More on GitHub) stays after them.
-  const firstProject = journeyMap.querySelector(".station--project, .station--more");
-  sorted.forEach((station, i) => {
-    station.style.setProperty("--i", i + 1);
-    journeyMap.insertBefore(station, firstProject);
-  });
-  renderDates();
-  placeLanguageCharts();
-  flow.rebuild();
-});
+Promise.all([...document.querySelectorAll("[data-version-url]")].map(loadStaticRelease)).then(refreshProjects);
 
 // ---------------------------------------------------------------------------
 // Private projects: their repos can't be read from the browser, so a scheduled job

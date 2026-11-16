@@ -127,7 +127,7 @@
   bottom: 2.25rem;
 }
 
-/* Journey: every app and project is a station on the same line (mobile-first; the
+/* Journey: every project is a station on the same line (mobile-first; the
    staggered desktop composition is in the media query below). */
 
 .journey {
@@ -206,7 +206,7 @@
 .station:nth-child(6n + 5) { --tilt: -4deg; }
 .station:nth-child(6n + 6) { --tilt: 3deg; }
 
-/* The artwork: an app icon, or a generated tile (repo initials / GitHub mark) */
+/* The artwork: a project icon, or a generated tile (repo initials / GitHub mark) */
 .station__icon > img,
 .station__thumb {
   position: relative;
@@ -298,7 +298,7 @@
 
 /* Language chart: a card that opens from the icon toward the text and spells out the ring. The
    station sets --peek (0 closed, 1 open) and everything below derives from it, so the card, its
-   bars and the faded text can't drift apart. Only repo stations with language data have one. */
+   bars and the faded text can't drift apart. Only projects with language data have one. */
 .station--langs {
   --peek: 0;
 }
@@ -510,7 +510,7 @@
   transition: scale 0.1s ease-out, rotate 0.1s ease-out;
 }
 
-/* Version (apps) or license (repos), pinned to the icon */
+/* Latest release version, pinned to the icon */
 .station__badge {
   position: absolute;
   right: -0.5rem;
@@ -534,7 +534,7 @@
   padding: 0.85rem 1.1rem;
 }
 
-/* Handwritten line above the title: release date (apps) or last commit (repos) */
+/* Handwritten line above the title: the latest release date */
 .station__date {
   display: block;
   margin-bottom: 0.1rem;
