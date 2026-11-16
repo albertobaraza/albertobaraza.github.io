@@ -245,14 +245,16 @@ const flow = (() => {
 // Projects. Every project is a `.station--project`, ahead of the closing "More on GitHub" stop.
 // Some are written in index.html (their release comes from their own /version.json), others are
 // built from GitHub (their release is the repo's latest GitHub release). Whatever the source, a
-// release is { version, releaseDate } ("X.Y.Z", "YYYY-MM-DD") and is shown the same way: a version
-// badge on the icon and a "Released:" line above the title. A project with no release has a release
-// of null (a repo without GitHub releases, a failed request, a /version.json without the fields)
-// and shows neither, through the same code.
+// release is { version, releaseDate } ("X.Y.Z", "YYYY-MM-DD") and is handled the same way: a version
+// badge on the icon, and the release date kept on the station (data-release-date) to sort by. The
+// date can also be written above the title as "Released: ...", which is switched off for now. A
+// project with no release has a release of null (a repo without GitHub releases, a failed request, a
+// /version.json without the fields) and gets neither, through the same code.
 // ---------------------------------------------------------------------------
 const journeyMap = document.querySelector(".journey__map");
 const moreStation = document.querySelector(".station--more");
 
+const SHOW_RELEASE_DATE = false;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+[\w.+-]*$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -265,11 +267,13 @@ const applyRelease = (station, release) => {
     station.querySelector(".station__icon").appendChild(badge);
   }
   if (typeof releaseDate === "string" && DATE_PATTERN.test(releaseDate)) {
-    station.dataset.releaseDate = releaseDate;
-    Object.assign(station.querySelector(".station__date").dataset, {
-      date: releaseDate,
-      dateLabel: "label-released",
-    });
+    station.dataset.releaseDate = releaseDate; // what the sort reads
+    if (SHOW_RELEASE_DATE) {
+      Object.assign(station.querySelector(".station__date").dataset, {
+        date: releaseDate,
+        dateLabel: "label-released",
+      });
+    }
   }
 };
 
