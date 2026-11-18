@@ -2,7 +2,7 @@
   "bling-bling": [["TypeScript",91.29],["CSS",6.14],["Shell",1.84],["Dockerfile",0.33],["JavaScript",0.29],["HTML",0.11]],
   "build-your-story": [["TypeScript",91.78],["Shell",3.58],["CSS",2.63],["Dockerfile",0.99],["XSLT",0.57],["HTML",0.32],["JavaScript",0.15]],
   "flash-back": [["TypeScript",73.88],["JavaScript",17.2],["Shell",7.12],["Dockerfile",0.68],["HTML",0.52],["Python",0.5],["CSS",0.1]],
-  "goblin-street": [["TypeScript",87.04],["Shell",6.02],["JavaScript",3.59],["CSS",2.67],["HTML",0.45],["Dockerfile",0.24]],
+  "goblin-street": [["TypeScript",87.32],["Shell",5.8],["JavaScript",3.46],["CSS",2.76],["HTML",0.43],["Dockerfile",0.23]],
   "tapeo-dev": [["TypeScript",58.37],["Astro",15.84],["CSS",12.08],["MDX",6.76],["JavaScript",2.98],["Shell",2.65],["Dockerfile",1.12],["HTML",0.22]],
   "whack-a-mole": [["JavaScript",69.26],["CSS",12.39],["Shell",10.54],["HTML",6.23],["Dockerfile",1.58]],
   "what-the-bill": [["TypeScript",91.06],["CSS",7.3],["Shell",1.04],["JavaScript",0.36],["Dockerfile",0.13],["HTML",0.11]]
