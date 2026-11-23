@@ -1,9 +1,9 @@
 {
-  "bling-bling": [["TypeScript",91.29],["CSS",6.14],["Shell",1.84],["Dockerfile",0.33],["JavaScript",0.29],["HTML",0.11]],
-  "build-your-story": [["TypeScript",91.78],["Shell",3.58],["CSS",2.63],["Dockerfile",0.99],["XSLT",0.57],["HTML",0.32],["JavaScript",0.15]],
+  "bling-bling": [["TypeScript",77.05],["JavaScript",14.13],["CSS",5.14],["Shell",2.32],["HTML",1.03],["Dockerfile",0.34]],
+  "build-your-story": [["TypeScript",67.25],["JavaScript",23.31],["Shell",3.58],["HTML",2.82],["CSS",1.88],["Dockerfile",0.74],["XSLT",0.41]],
   "flash-back": [["TypeScript",73.89],["JavaScript",17.19],["Shell",7.12],["Dockerfile",0.68],["HTML",0.52],["Python",0.5],["CSS",0.1]],
-  "goblin-street": [["TypeScript",87.94],["Shell",4.09],["CSS",3.74],["JavaScript",2.99],["HTML",1.04],["Dockerfile",0.2]],
-  "tapeo-dev": [["TypeScript",58.37],["Astro",15.84],["CSS",12.08],["MDX",6.76],["JavaScript",2.98],["Shell",2.65],["Dockerfile",1.12],["HTML",0.22]],
-  "whack-a-mole": [["JavaScript",69.26],["CSS",12.39],["Shell",10.54],["HTML",6.23],["Dockerfile",1.58]],
-  "what-the-bill": [["TypeScript",91.06],["CSS",7.3],["Shell",1.04],["JavaScript",0.36],["Dockerfile",0.13],["HTML",0.11]]
+  "goblin-street": [["TypeScript",87.93],["Shell",4.09],["CSS",3.74],["JavaScript",2.99],["HTML",1.04],["Dockerfile",0.2]],
+  "tapeo-dev": [["TypeScript",43.96],["JavaScript",26.92],["Astro",11.93],["CSS",9.1],["MDX",5.09],["Shell",1.99],["Dockerfile",0.85],["HTML",0.16]],
+  "whack-a-mole": [["JavaScript",84.6],["CSS",6.2],["Shell",5.28],["HTML",3.12],["Dockerfile",0.79]],
+  "what-the-bill": [["TypeScript",75.78],["JavaScript",15.13],["CSS",6],["Shell",1.86],["HTML",1.04],["Dockerfile",0.19]]
 }
