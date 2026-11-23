@@ -306,11 +306,30 @@ const refreshProjects = () => {
 // ---------------------------------------------------------------------------
 const EXCLUDED_REPOS = new Set(["albertobaraza", "albertobaraza.github.io"]);
 
-// Extra public links per repo ([label, url]), shown under its description next to the main repo link.
-const EXTRA_LINKS = {
-  "claude-limits-meter": [
-    ["VS Code Marketplace", "https://marketplace.visualstudio.com/items?itemName=albertobaraza.claude-limits-meter"],
-  ],
+// What a repo says about itself beyond the API, read from the package.json on its default branch
+// (raw.githubusercontent.com, open CORS, not counted against the API limit) as { icon, home }:
+// - icon: the "icon" field (a VS Code extension declares its Marketplace icon there),
+// - home: where the project lives for its users, if not the repo: a VS Code extension
+//   (engines.vscode + publisher) lives on its Marketplace page.
+// No package.json, or nothing in it: initials tile, and the repo is the project's link. Rejects when
+// the file can't be read for any other reason, so a hiccup is never cached as "no icon".
+const fetchRepoManifest = async (repo) => {
+  const base = `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/`;
+  const res = await fetch(`${base}package.json`);
+  if (res.status === 404) return { icon: null, home: null };
+  if (!res.ok) throw new Error(`package.json answered ${res.status}`);
+  const pkg = await res.json();
+  const icon = typeof pkg.icon === "string" && pkg.icon ? new URL(pkg.icon, base).href : null;
+  const isExtension = pkg.engines?.vscode && typeof pkg.publisher === "string" && typeof pkg.name === "string";
+  const home = isExtension
+    ? `https://marketplace.visualstudio.com/items?itemName=${encodeURIComponent(`${pkg.publisher}.${pkg.name}`)}`
+    : null;
+  return { icon, home };
+};
+
+// Set on purpose, these win over what the repo says. Only for a repo that publishes no icon itself.
+const REPO_ICON_OVERRIDES = {
+  soldat: "assets/projects/soldat.png",
 };
 
 // Returns [name, bytes] pairs sorted by share of the repo, largest first. Rejects when the request
@@ -337,15 +356,14 @@ const fetchLatestRelease = (repo) =>
     });
 
 const fetchRepoDetails = (repo) =>
-  Promise.all([fetchTopLanguages(repo), fetchLatestRelease(repo)]).then(([languages, release]) => ({
-    languages,
-    release,
-  }));
+  Promise.all([fetchTopLanguages(repo), fetchLatestRelease(repo), fetchRepoManifest(repo)]).then(
+    ([languages, release, manifest]) => ({ languages, release, manifest }),
+  );
 
 // GitHub allows 60 un-authenticated API requests an hour per IP and one page load costs 9, so a few
 // reloads (or a busy shared IP) would run the GitHub projects dry. The last complete answer is kept
 // in localStorage for an hour, and if a refresh fails the last good one is shown whatever its age.
-const REPOS_CACHE_KEY = "github-repos-v2";
+const REPOS_CACHE_KEY = "github-repos-v3";
 const REPOS_CACHE_TTL = 60 * 60 * 1000;
 
 const readReposCache = () => {
@@ -431,21 +449,26 @@ const getReadableTextColor = (hex) => {
   return luminance > 0.6 ? "#1a1a1a" : "#ffffff";
 };
 
-// Drop an image at assets/projects/<repo-name>.png to override the generated initials tile.
-const buildThumb = (repo, color) => {
+// A project's icon: its initials on its color, swapped for the image at iconUrl once (and if) it
+// loads. dataset.icon remembers which image was asked for, so a re-render can tell whether the
+// icon actually changed.
+const buildThumb = (name, color, iconUrl) => {
   const thumb = document.createElement("span");
   thumb.className = "station__thumb";
   thumb.style.background = color;
   thumb.style.color = getReadableTextColor(color);
-  thumb.textContent = getInitials(repo.name);
+  thumb.textContent = getInitials(name);
+  thumb.dataset.icon = iconUrl || "";
 
-  const img = new Image();
-  img.alt = "";
-  img.onload = () => {
-    thumb.style.background = "";
-    thumb.replaceChildren(img);
-  };
-  img.src = `assets/projects/${repo.name}.png`;
+  if (iconUrl) {
+    const img = new Image();
+    img.alt = "";
+    img.onload = () => {
+      thumb.style.background = "";
+      thumb.replaceChildren(img);
+    };
+    img.src = iconUrl;
+  }
 
   return thumb;
 };
@@ -569,9 +592,11 @@ window.addEventListener("resize", () => {
 });
 
 const buildProjectStation = ({ repo, languages, release }) => {
-  // A link can't nest inside another, so a station with extra links is a div whose title link
-  // is stretched over the whole station (see .station--multi).
-  const extraLinks = EXTRA_LINKS[repo.name] || [];
+  // A project that lives somewhere other than its repo (repo.home) links there, with the repo as a
+  // second link under its description. A link can't nest inside another, so a station with a
+  // second link is a div whose title link is stretched over the whole station (see .station--multi).
+  const mainUrl = repo.home || repo.html_url;
+  const extraLinks = repo.home ? [["GitHub", repo.html_url]] : [];
   const hasExtra = extraLinks.length > 0;
   const slices = summarizeLanguages(languages);
   const color = slices[0]?.color || DEFAULT_THUMB_COLOR;
@@ -582,7 +607,7 @@ const buildProjectStation = ({ repo, languages, release }) => {
   station.style.setProperty("--node-color", color);
 
   const repoLink = hasExtra ? document.createElement("a") : station;
-  repoLink.href = repo.html_url;
+  repoLink.href = mainUrl;
   repoLink.target = "_blank";
   repoLink.rel = "noopener";
   if (hasExtra) repoLink.className = "station__stretch";
@@ -593,13 +618,13 @@ const buildProjectStation = ({ repo, languages, release }) => {
   const icon = document.createElement(hasExtra ? "a" : "span");
   icon.className = "station__icon";
   if (hasExtra) {
-    icon.href = repo.html_url;
+    icon.href = mainUrl;
     icon.target = "_blank";
     icon.rel = "noopener";
     icon.tabIndex = -1;
     icon.setAttribute("aria-hidden", "true");
   }
-  icon.append(buildOrbit(slices), buildThumb(repo, color));
+  icon.append(buildOrbit(slices), buildThumb(repo.name, color, REPO_ICON_OVERRIDES[repo.name] || repo.icon));
 
   const date = document.createElement("span");
   date.className = "station__date";
@@ -667,6 +692,8 @@ const loadRepoProjects = async () => {
         name: repo.name,
         html_url: repo.html_url,
         description: repo.description,
+        icon: details[i]?.manifest.icon || null,
+        home: details[i]?.manifest.home || null,
       },
       languages: details[i]?.languages || [],
       release: details[i]?.release || null,
