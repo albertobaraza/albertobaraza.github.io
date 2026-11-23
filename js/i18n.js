@@ -44,15 +44,7 @@ const translations = {
     "proj-no-description": "No description provided.",
     "proj-languages": "Languages",
     "proj-lang-other": "Other",
-    "proj-tapeo-dev-desc": "An open notebook of guides, notes, links and projects.",
     "label-released": "Released:",
-
-    "proj-what-the-bill-desc": "Your bills, charted. A dashboard that turns PDF invoices into cost and consumption trends, entirely in your browser: nothing is uploaded.",
-    "proj-build-your-story-desc": "Build and export a polished CV in minutes: start from scratch, import from LinkedIn, or use your own AI assistant. Free, no sign-up.",
-    "proj-whack-a-mole-desc": "A browser whack-a-mole game with a live turn queue, spectating, and a global leaderboard.",
-    "proj-bling-bling-desc": "Personal finance dashboard with pluggable data sources (Google Sheets or CSV), multi-currency conversion to EUR, and interactive charts.",
-    "proj-flashback-desc": "Photo culling tool that enriches your photos with accurate dates and locations, then helps you keep only the ones that truly matter.",
-    "proj-goblin-street-desc": "A trading-terminal view of the commodities auction house: prices, candles, order books and movers.",
 
     "experience-title": "Experience",
     "tl-present": "Present",
@@ -176,15 +168,7 @@ const translations = {
     "proj-no-description": "Sin descripción.",
     "proj-languages": "Lenguajes",
     "proj-lang-other": "Otros",
-    "proj-tapeo-dev-desc": "Un cuaderno abierto de guías, notas, enlaces y proyectos.",
     "label-released": "Lanzamiento:",
-
-    "proj-what-the-bill-desc": "Tus facturas, en gráficas. Un panel que convierte facturas en PDF en tendencias de coste y consumo, todo en tu navegador: no se sube nada.",
-    "proj-build-your-story-desc": "Crea y exporta un CV cuidado en minutos: desde cero, importando de LinkedIn o con tu propio asistente de IA. Gratis y sin registro.",
-    "proj-whack-a-mole-desc": "Un juego de machacatopos en el navegador con cola de turnos en directo, modo espectador y clasificación global.",
-    "proj-bling-bling-desc": "Panel de finanzas personales con fuentes de datos intercambiables (Google Sheets o CSV), conversión multidivisa a EUR y gráficos interactivos.",
-    "proj-flashback-desc": "Herramienta para depurar fotos: enriquece tus fotos con fechas y ubicaciones precisas y te ayuda a quedarte solo con las que de verdad importan.",
-    "proj-goblin-street-desc": "Una vista de terminal de trading de la casa de subastas de materias primas: precios, velas, libros de órdenes y mayores movimientos.",
 
     "experience-title": "Experiencia",
     "tl-present": "Actualidad",

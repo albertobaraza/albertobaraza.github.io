@@ -731,17 +731,123 @@ if (journeyMap && moreStation) {
 }
 
 // ---------------------------------------------------------------------------
-// Projects written in index.html: the deployed version and release date come from each project's
-// own /version.json (open CORS), {"version":"X.Y.Z","releaseDate":"YYYY-MM-DD"}. A project that
-// isn't live yet, or can't be reached, just gets no badge or date.
+// Projects written in index.html (tagged data-site): index.html holds only their address. Each
+// describes itself from its own origin, both files served with open CORS:
+// - /manifest.json, its web app manifest: name, description and icon. The description is English,
+//   with other languages in description_localized (the W3C manifest localization proposal, e.g.
+//   { "es": "..." }); name_localized works the same way.
+// - /version.json, {"version":"X.Y.Z","releaseDate":"YYYY-MM-DD"}: its release.
+// Nothing about a project is kept here, so a new icon or wording shows up as soon as it deploys.
+// Set on purpose, a station attribute wins over the manifest: data-name, data-icon, and the inline
+// --node-color (the portfolio's own palette, since a manifest's theme_color is the app's toolbar).
+// The last manifest read from each project is kept in localStorage, so a returning visit paints at
+// once and a project that is down still shows what it last said. Never read and unreachable: the
+// station shows its hostname and an initials tile. A project with no release gets no badge or date.
 // ---------------------------------------------------------------------------
-const loadStaticRelease = (station) =>
-  fetch(station.dataset.versionUrl)
+const MANIFESTS_CACHE_KEY = "site-manifests-v1";
+const ICON_TARGET_PX = 240; // icons show at up to 120 CSS px, so twice that is sharp on 2x screens
+const siteStations = [...document.querySelectorAll("[data-site]")];
+const manifestUrlOf = (station) => new URL("/manifest.json", station.href).href;
+
+const readManifestsCache = () => {
+  try {
+    const cached = JSON.parse(localStorage.getItem(MANIFESTS_CACHE_KEY));
+    return cached && typeof cached === "object" && !Array.isArray(cached) ? cached : {};
+  } catch {
+    return {}; // storage blocked or the entry is garbled: behave as if nothing was cached
+  }
+};
+
+// A manifest member in the current language: member_localized[lang] (a string or { value }),
+// else the member itself.
+const localizedMember = (manifest, member) => {
+  const entry = manifest[`${member}_localized`]?.[window.i18n.getLang()];
+  const value = typeof entry === "string" ? entry : entry?.value;
+  if (typeof value === "string" && value.trim()) return value;
+  return typeof manifest[member] === "string" ? manifest[member] : "";
+};
+
+// The smallest "any"-purpose icon that is at least ICON_TARGET_PX (an SVG, sizes "any", counts as
+// big enough), else the biggest there is. src is relative to the manifest, as the spec says.
+const pickManifestIcon = (manifest, manifestUrl) => {
+  const icons = (Array.isArray(manifest.icons) ? manifest.icons : []).filter(
+    (icon) => typeof icon?.src === "string" && (!icon.purpose || String(icon.purpose).split(/\s+/).includes("any")),
+  );
+  const sizeOf = (icon) =>
+    icon.sizes === "any" ? Infinity : Math.max(0, ...String(icon.sizes || "").split(/\s+/).map((s) => parseInt(s, 10) || 0));
+  const bySize = [...icons].sort((a, b) => sizeOf(a) - sizeOf(b));
+  const best = bySize.find((icon) => sizeOf(icon) >= ICON_TARGET_PX) || bySize[bySize.length - 1];
+  if (!best) return null;
+  const url = new URL(best.src, manifestUrl);
+  return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+};
+
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+const renderSite = (station, manifest) => {
+  const name = station.dataset.name || (manifest && localizedMember(manifest, "name")) || new URL(station.href).hostname;
+  station.querySelector(".station__name").textContent = name;
+  station.querySelector(".station__desc").textContent = manifest ? localizedMember(manifest, "description") : "";
+
+  if (!station.style.getPropertyValue("--node-color") && HEX_COLOR.test(manifest?.theme_color || "")) {
+    station.style.setProperty("--node-color", manifest.theme_color);
+  }
+  const color = station.style.getPropertyValue("--node-color").trim();
+
+  const iconUrl = station.dataset.icon || (manifest && pickManifestIcon(manifest, manifestUrlOf(station))) || "";
+  const current = station.querySelector(".station__icon > .station__thumb");
+  // Rebuilding an unchanged icon would flash its initials, so only swap when it actually changed
+  if (current?.dataset.icon === iconUrl && (iconUrl || current.textContent === getInitials(name))) return;
+  const thumb = buildThumb(name, HEX_COLOR.test(color) ? color : DEFAULT_THUMB_COLOR, iconUrl);
+  if (current) current.replaceWith(thumb);
+  else station.querySelector(".station__icon").appendChild(thumb);
+};
+
+const manifestsCache = readManifestsCache();
+const siteManifests = new Map(siteStations.map((station) => [station, manifestsCache[manifestUrlOf(station)] || null]));
+siteManifests.forEach((manifest, station) => {
+  if (manifest) renderSite(station, manifest);
+});
+
+const loadSiteManifest = (station) =>
+  fetch(manifestUrlOf(station))
+    .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+    .then((manifest) => {
+      if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("not a manifest");
+      // Only what a station uses, so the cache stays small
+      const { name, name_localized, description, description_localized, icons, theme_color } = manifest;
+      siteManifests.set(station, { name, name_localized, description, description_localized, icons, theme_color });
+    })
+    .catch(() => {}) // keep the cached copy, if any
+    .then(() => renderSite(station, siteManifests.get(station)));
+
+const sitesLoaded = Promise.all(siteStations.map(loadSiteManifest)).then(() => {
+  const toCache = {};
+  siteManifests.forEach((manifest, station) => {
+    if (manifest) toCache[manifestUrlOf(station)] = manifest;
+  });
+  try {
+    localStorage.setItem(MANIFESTS_CACHE_KEY, JSON.stringify(toCache));
+  } catch {
+    // storage blocked or full: just no caching
+  }
+});
+
+// The name and description follow the language toggle. A station still waiting for its first
+// manifest is left alone: its fetch renders it (or its fallback) when it settles.
+document.addEventListener("langchange", () =>
+  siteManifests.forEach((manifest, station) => {
+    if (manifest) renderSite(station, manifest);
+  }),
+);
+
+const loadSiteRelease = (station) =>
+  fetch(new URL("/version.json", station.href).href)
     .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
     .then((release) => applyRelease(station, release))
     .catch(() => {});
 
-Promise.all([...document.querySelectorAll("[data-version-url]")].map(loadStaticRelease)).then(refreshProjects);
+// The sort reads names too, so it waits for the manifests as well as the releases
+Promise.all([sitesLoaded, ...siteStations.map(loadSiteRelease)]).then(refreshProjects);
 
 // ---------------------------------------------------------------------------
 // Private projects: their repos can't be read from the browser, so a scheduled job
