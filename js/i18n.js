@@ -133,8 +133,8 @@ const translations = {
 
     "nav-projects": "Proyectos",
     "nav-experience": "Experiencia",
-    "coffee-short": "Invítame a un café",
-    "coffee-label": "Invítame a un café (se abre en una pestaña nueva)",
+    "coffee-short": "Buy me a coffee",
+    "coffee-label": "Buy me a coffee (se abre en una pestaña nueva)",
 
     "hero-hi": "¡Hola!",
     "hero-title": "Ingeniero de Datos",
