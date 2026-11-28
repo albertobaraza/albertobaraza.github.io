@@ -31,7 +31,7 @@
   const SLIDE_WIND = 30; // the push at the fastest moment of a page slide, as the px/frame of scroll speed it stands in for
   const TILT_DEADZONE = 0.07; // rad (about 4 degrees): a hand is never level, and level lets the ropes sleep at their exact rest pose
   const MAX_TILT = 0.52; // rad (30 degrees): the furthest the ropes lean, so the toggles at the edges don't swing off the screen
-  const TILT_SMOOTHING = 0.2; // share of the remaining way to the new lean covered each frame
+  const TILT_EASE = 0.075; // s: the lean covers most of the way to a new one in about this long, at any frame rate
   const ANCHOR_Y = -12; // ropes start just above the window so they appear to come from outside
   const DRAG_THRESHOLD = 5; // px of mouse travel before a press becomes a drag (and not a click)
   const TOUCH_DRAG_THRESHOLD = 10; // fingers jitter more than a mouse, so a tap gets more slack
@@ -329,7 +329,7 @@
     last = now;
 
     if (tilt !== tiltTarget) {
-      tilt += (tiltTarget - tilt) * TILT_SMOOTHING;
+      tilt += (tiltTarget - tilt) * (1 - Math.exp(-dt / TILT_EASE));
       if (Math.abs(tiltTarget - tilt) < 0.0005) tilt = tiltTarget;
       gravX = GRAVITY * Math.sin(tilt);
       gravY = GRAVITY * Math.cos(tilt);
