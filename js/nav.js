@@ -29,7 +29,7 @@
   const WIND = 0.0009; // sideways acceleration per px/frame of scroll speed
   const MAX_SCROLL_SPEED = 60; // px/frame, caps the wind
   const SLIDE_WIND = 30; // the push at the fastest moment of a page slide, as the px/frame of scroll speed it stands in for
-  const TILT_DEADZONE = 0.07; // rad (about 4 degrees): a hand is never level, and level lets the ropes sleep
+  const TILT_DEADZONE = 0.07; // rad (about 4 degrees): a hand is never level, and level lets the ropes sleep at their exact rest pose
   const MAX_TILT = 0.52; // rad (30 degrees): the furthest the ropes lean, so the toggles at the edges don't swing off the screen
   const TILT_SMOOTHING = 0.2; // share of the remaining way to the new lean covered each frame
   const ANCHOR_Y = -12; // ropes start just above the window so they appear to come from outside
@@ -247,16 +247,22 @@
     let energy = 0;
     for (const p of pts) if (p.inv) energy += Math.abs(p.x - p.px) + Math.abs(p.y - p.py);
     item.energy = energy;
-    item.still = !drag && wind === 0 && item.stretch === 1 && tilt === 0 && energy < 0.025 * pts.length ? item.still + 1 : 0;
+    item.still = !drag && wind === 0 && item.stretch === 1 && tilt === tiltTarget && energy < 0.025 * pts.length ? item.still + 1 : 0;
     if (item.still > RATE / 2) sleep(item);
   };
 
-  // Hanging straight down is the true equilibrium, so snapping there is invisible and guarantees
-  // a control is never left at a slightly crooked angle.
+  // Level, hanging straight down is the true equilibrium, so snapping there is invisible and
+  // guarantees a control is never left at a slightly crooked angle. Tilted, the equilibrium is the
+  // lean, which no stored pose holds, so the rope sleeps where it hangs, its last trace of motion
+  // dropped: before, a tilted rope never slept, and a phone held off level drew every frame.
   const sleep = (item) => {
     item.pts.forEach((p, i) => {
-      p.x = p.px = item.restPose[i][0];
-      p.y = p.py = item.restPose[i][1];
+      if (tilt === 0) {
+        p.x = item.restPose[i][0];
+        p.y = item.restPose[i][1];
+      }
+      p.px = p.x;
+      p.py = p.y;
     });
     item.energy = 0;
     item.asleep = true;
@@ -584,7 +590,9 @@
     });
     item.stretch = clamp(snap.stretch, MIN_STRETCH, 4);
     item.stretchVel = snap.stretchVel;
-    if (snap.asleep) {
+    // Asleep only at its rest pose: one that slept leaning on a tilted phone settles again under
+    // this page's tilt, so it is not left crooked if this page gets no reading of it.
+    if (snap.asleep && snap.pts.every((p) => p.every((v) => v === 0))) {
       item.asleep = true;
       item.energy = 0;
       item.needsRender = true;
