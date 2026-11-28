@@ -527,19 +527,21 @@
 
   // Only touch devices (a laptop's sensor would make a desktop page twitch), and not for people who
   // asked for less motion. Listening costs nothing where there is no permission to be had. iOS (and
-  // any browser that has the call) must be asked, in answer to a tap or drag, so that happens the
-  // first time a hanging control is touched.
+  // any browser that has the call: Chrome too, from version 151) must be asked, in answer to a touch,
+  // so that happens when a hanging control is touched, at each touch until there is an answer: iOS
+  // does not ask for a touch it does not count as a gesture (the end of a drag may not be one) and
+  // fails instead, and asks at the next. An answer, either one, is kept by the browser.
   if (!reducedMotion && "DeviceOrientationEvent" in window && window.matchMedia("(pointer: coarse)").matches) {
     window.addEventListener("deviceorientation", onOrientation, { passive: true });
 
     if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      const answered = () => document.removeEventListener("pointerup", askForMotion, true);
       const askForMotion = (e) => {
         if (isStill()) return; // nothing to ask for while the motion is off
         if (e.pointerType !== "touch" || !(e.target instanceof Element) || !e.target.closest(".hang")) return;
-        document.removeEventListener("pointerup", askForMotion, true);
         try {
-          Promise.resolve(DeviceOrientationEvent.requestPermission()).catch(() => { /* declined: no tilt */ });
-        } catch (err) { /* not allowed right now: no tilt */ }
+          Promise.resolve(DeviceOrientationEvent.requestPermission()).then(answered, () => { /* not asked: again at the next touch */ });
+        } catch (err) { /* not allowed right now: asked again at the next touch */ }
       };
       document.addEventListener("pointerup", askForMotion, true);
     }
